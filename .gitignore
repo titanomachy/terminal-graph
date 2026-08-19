@@ -1,0 +1,26 @@
+# Nim compiler output
+nimcache/
+htmldocs/
+
+# Executables produced beside source entry points
+/app
+/terminal_graphs
+/examples/advanced_graphs
+/examples/all_graphs
+/examples/bar_graph
+/examples/line_graph
+/examples/live_graph
+/examples/multiplot_graph
+/examples/sparkline_graph
+/examples/static_graph
+/examples/streaming_line_graph
+/examples/streaming_multiplot_graph
+/examples/streaming_sparklines
+/examples/xy_graph
+/tests/test_terminal_graphs
+/tests/test_line_graphs
+/tests/test_advanced_graphs
+/tests/test_chart_types
+
+# Other
+RELEASING.md
