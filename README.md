@@ -11,12 +11,14 @@ effects and does not change terminal state.
 <table>
   <tr>
     <td width="50%">
-      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph"></a><br>
-      <strong>Live service metrics</strong>
+      <a href="examples/live_graph.nim">
+        <img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph">
+      </a>
     </td>
     <td width="50%">
-      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph"></a><br>
-      <strong>Streaming API latency</strong>
+      <a href="examples/streaming_line_graph.nim">
+        <img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph">
+      </a>
     </td>
   </tr>
 </table>
