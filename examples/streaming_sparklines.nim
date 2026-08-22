@@ -21,6 +21,7 @@ when isMainModule:
     step = 0.0
     hasPreviousFrame = false
 
+  echo ""
   hideCursor()
   try:
     while true:
