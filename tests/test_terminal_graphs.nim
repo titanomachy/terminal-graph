@@ -239,6 +239,7 @@ suite "terminal_graphs live display":
       dashboard.startLive()
       dashboard.startLive() # Starting twice is intentionally idempotent.
       check dashboard.isActive
+      dashboard.draw("first row\nsecond row")
       dashboard.draw("responsive frame")
       dashboard.stopLive()
       dashboard.stopLive() # Stopping twice is intentionally idempotent.
@@ -249,8 +250,10 @@ suite "terminal_graphs live display":
       output.close()
       outputOpen = false
       let emitted = path.readFile()
-      check emitted.startsWith("\e[1;1f\e[2J\e[?25l")
-      check "\e[1;1f\e[2Jresponsive frame" in emitted
+      check emitted.startsWith("\e[2J\e[H\e[?25l")
+      check "\e[Hfirst row\e[K\nsecond row\e[J" in emitted
+      check "\e[Hresponsive frame\e[J" in emitted
+      check "\e[2K" notin emitted
       check emitted.endsWith("\e[0m\e[?25h")
 
   test "rejects a missing dashboard output":

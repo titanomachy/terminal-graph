@@ -1,403 +1,96 @@
-# Terminal graphs
+# terminal_graphs
 
-This pure-Nim package provides the reusable `terminal_graphs` library. One
-façade import provides horizontal bars, asciigraph-style and irregular XY lines, 
-scatter plots, static and live displays, multiplot layouts, 2D surfaces and filled contours, 
-compact sparklines, and the shared `terminal_styles` API. The implementation is pure Nim: it
-does not require Python or an external plotting backend. Importing it does not
-print, loop, hide the cursor, or otherwise change terminal state.
+Pure-Nim terminal charts: connected lines, horizontal bars, irregular XY and
+scatter plots, static and live graphs, responsive multiplot dashboards, 2D
+surfaces, filled contours, and sparklines.
 
-## Requirements
+The package renders strings with Unicode and ANSI styling—there is no Python
+runtime or external plotting backend. Importing `terminal_graphs` has no side
+effects and does not change terminal state.
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph"></a><br>
+      <strong>Live service metrics</strong>
+    </td>
+    <td width="50%">
+      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph"></a><br>
+      <strong>Streaming API latency</strong>
+    </td>
+  </tr>
+</table>
+
+## Requirements and installation
 
 - Nim 2.0.0 or newer
 - `terminal_styles` 0.1.0 or newer
 
-From this directory, install dependencies and run the checks:
+Until the first release, install from a checkout:
 
 ```sh
-nimble test
-nimble examples
+git clone https://github.com/titanomachy/terminal-graphs.git
+cd terminal-graphs
+nimble install
 ```
 
-The public façade can also be compiled as a small finite demo. Its executable
-code is guarded by `when isMainModule`, so importing it remains side-effect
-free and the Nimble package does not install an application binary:
+The repository also detects `../terminal_styles/src`, which is convenient when
+both packages are sibling workspaces.
 
-```sh
-nim c -r src/terminal_graphs.nim
-```
+## Quick start
 
-## Importing the graph module
-
-Code compiled through this Nimble package can import the module directly:
+One façade import exposes every graph family and the shared styling API:
 
 ```nim
 import terminal_graphs
 
-echo plot([3, 4, 9, 6, 2, 4, 5, 8])
-echo sparkline([1.0, 4.0, 2.0, 8.0])
+echo sparkline([1, 4, 2, 8, 5])
 
-var graph = initStaticGraph("Request latency", unit = "ms")
-let latency = graph.addSeries("p95", marker = "x")
+echo plot(
+  [3, 4, 9, 6, 2, 4, 5, 8],
+  graphWidth(40),
+  graphHeight(8),
+  graphCaption("Request latency"),
+  graphSeriesColors([colorBrightCyan])
+)
 
-graph.push(latency, [18.0, 20.5, 19.0, 23.0])
-echo graph.render(width = 60, height = 14, useColor = false)
+var graph = initStaticGraph("Weekly requests", unit = "requests")
+let requests = graph.addSeries(
+  "requests", style = psFill, marker = "▄"
+)
+graph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
+
+echo graph.render(width = 64, height = 14, useColor = false)
 ```
-
-For an application elsewhere on disk, install both packages with Nimble. When
-working from this split workspace without installing them, add both `src`
-directories to the compiler path:
-
-```sh
-nim c --path:/path/to/terminal_styles/src \
-  --path:/path/to/terminal_graphs/src your_main.nim
-```
-
-## Module layout
-
-`src/terminal_graphs.nim` is both the public façade and the optional demo entry
-point. It imports and re-exports the focused implementations:
-
-```text
-src/
-├── terminal_graphs.nim                  public façade and demo entry point
-└── terminal_graphs/
-    ├── bar_graphs.nim                   grouped and stacked horizontal bars
-    ├── line_graphs.nim                  sample-indexed ASCII line graphs
-    ├── live_graphs.nim                  in-place terminal updates
-    ├── multiplot_graphs.nim             responsive ANSI-aware graph grids
-    ├── sparkline_graphs.nim             compact single-line graphs
-    ├── static_graphs.nim                plot data and frame rendering
-    ├── surface_graphs.nim               2D surfaces and filled contours
-    └── xy_graphs.nim                    scatter and irregular XY graphs
-```
-
-This keeps the common import stable as more graph types are added. Advanced
-users can import a submodule directly—for example,
-`import terminal_graphs/sparkline_graphs`—when they intentionally want only
-that API.
-
-To add another graph family, place its implementation under
-`src/terminal_graphs/`, then import and export that module from
-`src/terminal_graphs.nim`. Existing application imports remain unchanged.
-The former `src/modules` directory is no longer needed. Shared colors, ANSI
-parsing, and terminal-cell layout live in the independent `terminal_styles`
-package. The graph façade re-exports that dependency, so applications using
-graphs still need only `import terminal_graphs`.
 
 ## API overview
 
-### ASCII line graphs
+| Graph family | Main API | Highlights |
+| --- | --- | --- |
+| Connected lines | `plot`, `plotMany`, `AsciiGraphConfig` | Interpolation, labeled axes, formatters, legends, custom glyphs, gradients, thresholds, and NaN gaps |
+| Horizontal bars | `plotBars`, `BarGraphOptions` | Single-series, grouped, and stacked positive/negative bars around a shared zero axis |
+| XY and scatter | `plotXY`, `plotXYMany`, `plotScatter`, `plotScatterMany` | Explicit coordinates, fixed or automatic viewports, clipping, labels, markers, and legends |
+| Static graphs | `StaticGraph`, `initStaticGraph`, `render` | Bounded histories, line/fill series, statistics, automatic or fixed ranges, and deterministic dimensions |
+| Sparklines | `sparkline`, `SparklineOptions` | Shared or automatic ranges, gaps, custom ticks, and ANSI-256 palettes |
+| Surfaces and contours | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
+| Multiplot layouts | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
+| Live displays | `LiveGraph`, `LiveLineGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
+| Terminal styling | Re-exported `terminal_styles` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
 
-`plot` and `plotMany` provide a Nim implementation of the feature set from
-[`guptarohit/asciigraph`](https://github.com/guptarohit/asciigraph). Integer and
-floating-point inputs are accepted:
+Line charts accept either composable option builders such as `graphWidth(40)`
+or a reusable `AsciiGraphConfig`; the other graph families use their focused
+options objects. Explicit dimensions make snapshots and logs deterministic,
+while zero dimensions detect the current terminal. Color-capable renderers
+also provide `useColor = false` for plain output.
 
-```nim
-import terminal_graphs
+Focused imports such as `import terminal_graphs/sparkline_graphs` are
+supported, but most applications should use `import terminal_graphs`.
 
-let data = [3, 4, 9, 6, 2, 4, 5, 8, 5, 10, 2, 7, 2, 5, 6]
+### Live lifecycle
 
-echo plot(
-  data,
-  graphHeight(8),
-  graphWidth(40),
-  graphCaption("Requests"),
-  graphXAxisRange(0.0, 14.0),
-  graphXAxisTickCount(3)
-)
-```
-
-The line renderer supports:
-
-- `plot` for one series and `plotMany` for overlapping series.
-- `graphWidth` interpolation and explicit or automatically calculated
-  `graphHeight`.
-- Soft `lowerBound` and `upperBound` values. Data outside them still remains
-  visible.
-- `labelPrecision`, `axisOffset`, captions, and configurable `graphLineEnding`.
-- `graphYAxisFormatter` and `graphXAxisFormatter` callbacks for units and
-  domain-specific labels.
-- Labeled X axes through `graphXAxisRange` and `graphXAxisTickCount`.
-- NaN values as gaps, with start and end caps around disconnected segments.
-- Per-series drawing symbols through `LineCharSet`, `createLineCharSet`, and
-  `graphSeriesChars`.
-- Standard, bright, ANSI-256, and RGB series, axis, label, and caption colors.
-  Use named values such as `colorBrightRed`, `indexedColor(index)`, or
-  `rgbColor(red, green, blue)`.
-- Centered colored legends with `graphSeriesLegends`.
-- Value-based gradients with `graphColorGradient`; `HeatmapSpectrum` is the
-  built-in cool-to-warm palette.
-- Strict `graphColorAbove` and `graphColorBelow` thresholds. Threshold colors
-  override gradients, which override ordinary series colors. Above wins if
-  both thresholds match.
-- `clearTerminal` and `clearLines` helpers for repeated/realtime rendering.
-
-The option-builder API is composable. For frequently reused settings, create
-an `AsciiGraphConfig` with `initAsciiGraphConfig`, change its public fields, and
-pass it to `plot` or `plotMany`.
-
-Color option names have an `ansi` or `graph` prefix because Nim identifiers are
-case-insensitive; this prevents collisions with common procedures such as
-`red` and fields such as `width`.
-
-### Horizontal bar graphs
-
-`plotBars` accepts category labels and either one numeric sequence or several
-series. Positive and negative bars share a visible zero baseline. Multiple
-series can be rendered as separate grouped rows or accumulated into positive
-and negative stacks:
+Always restore terminal state in a `finally` block:
 
 ```nim
-import terminal_graphs
-
-let labels = ["North", "South", "East"]
-let values = @[
-  @[18.0, 24.0, -7.0],
-  @[12.0, -5.0, 11.0]
-]
-
-var options = initBarGraphOptions()
-options.width = 32             # Width of the bar field, excluding labels.
-options.caption = "Change by region"
-options.unit = "%"
-options.seriesLegends = @["current", "previous"]
-options.seriesColors = @[colorBrightCyan, colorBrightYellow]
-
-echo plotBars(labels, values, options)
-
-options.mode = bmStacked
-echo plotBars(labels, values, options)
-```
-
-Automatic ranges always contain zero. `setBarRange` fixes a shared range and
-requires that it contain zero; `clearBarRange` restores automatic scaling.
-`useColor`, `showValues`, `glyph`, `axisGlyph`, and `lineEnding` control output.
-Labels and glyphs are Unicode-aware, while non-finite values, inconsistent
-series lengths, and invalid options raise `ValueError`.
-
-### Scatter and irregular XY graphs
-
-The ordinary line renderer treats values as evenly spaced samples. The XY
-renderer instead maps explicit coordinates, making it suitable for irregular
-time intervals, mathematical paths, and scatter data:
-
-```nim
-import terminal_graphs
-
-let signal = @[
-  xyPoint(-5.0, -1.0),
-  xyPoint(-3.8, 2.5),
-  xyPoint(-0.4, 0.5),
-  xyPoint(0.2, 4.0),
-  xyPoint(5.0, 1.0)
-]
-
-var options = initXYPlotOptions()
-options.width = 50
-options.height = 16
-options.caption = "Irregular signal"
-options.xLabel = "time"
-options.yLabel = "value"
-
-echo plotXY(signal, options)
-echo plotScatter(signal, options)
-```
-
-`plotXY` connects points in their supplied order; `plotScatter` draws only
-markers. `plotXYMany` and `plotScatterMany` accept colored, named `XYSeries`
-values. Paired numeric arrays are also accepted, for example
-`plotScatter(xValues, yValues)`.
-
-Automatic ranges include zero, so the axes cross at `(0, 0)` whenever both
-dimensions contain it. Fixed viewports set with `setXRange` and `setYRange`
-clip connected segments correctly; axes move to the nearest canvas edge if
-zero lies outside a fixed range. NaN coordinates break a connected path and
-infinite coordinates raise `ValueError`.
-
-### Static graphs
-
-- `initStaticGraph(title, unit, maxSamples)` creates a graph and sets a bounded
-  per-series history. The default is 1,000 samples. `initPlotter` remains as an
-  equivalent general-purpose constructor.
-- `addSeries(...)` adds a line or filled series and returns its numeric handle.
-- `push(handle, value)` and `push(handle, values)` append finite samples.
-- `samples`, `latest`, `sampleCount`, and `statistics` inspect retained data.
-- `setMaxSamples` changes retention and trims old samples immediately.
-- `setRange(minimum, maximum)` fixes the y-axis; `clearRange` restores automatic
-  scaling.
-- `render(...)` returns a string and never modifies the plot. Width and height
-  default to the current terminal. Explicit dimensions are useful for tests,
-  logs, and snapshots. `useColor = false` removes ANSI escape sequences, while
-  `showStats = false` leaves out the summary line.
-
-Markers must contain exactly one Unicode code point. Many terminal symbols are
-one code point but occupy two display columns (for example some emoji), so
-single-column symbols such as `x`, `•`, and `▄` produce the most reliable
-alignment.
-
-Series drawn later take precedence if multiple values occupy the same cell.
-Filled series extend from the graph's lower y-axis bound to their sample value.
-
-### Sparklines
-
-`sparkline(values)` accepts integer or floating-point data and returns a
-single-line graph scaled across `▁▂▃▄▅▆▇█`. Empty input returns an empty string,
-NaN creates a one-column gap, and infinity raises `ValueError`. An all-zero
-series uses `▁`; constant nonzero data uses the more informative middle tick
-`▅` by default.
-
-Use `SparklineOptions` when several sparklines need a shared scale or styled
-output:
-
-```nim
-import terminal_graphs
-
-var options = initSparklineOptions()
-options.setSparklineRange(0.0, 100.0)
-options.useColor = true
-
-echo sparkline([10, 25, 40, 75, 100], options)
-```
-
-`minimum` and `maximum` are independent optional bounds, and values beyond the
-effective range are safely clamped. `FireSparklinePalette` is the default
-yellow-to-red ANSI-256 gradient when coloring is enabled; assign any
-`seq[TerminalColor]` to `palette` for a custom gradient. `ticks` and `gapGlyph` are
-also configurable. Set `constantMode = scmLowest` to retain the old behavior
-for constant nonzero sequences. `setSparklineRange` and
-`clearSparklineRange` manage both bounds together; `setSparklineMinimum`,
-`setSparklineMaximum`, and their corresponding clear procedures manage each
-bound independently.
-
-Sparklines deliberately remain a small, non-streaming renderer. Keeping live
-terminal lifecycle code in `live_graphs.nim` makes it possible to reuse the
-same sparkline output in logs, tables, dashboards, or a live application
-without coupling the two APIs.
-
-### Multiplot layouts
-
-`multiplot` arranges any already-rendered graphs in an ANSI-aware grid. Logical
-columns share one width across every row, so panels line up even when the
-individual graph sizes differ. The concise overload remains useful for fixed,
-deterministic reports:
-
-```nim
-import terminal_graphs
-
-let left = plot([1, 4, 2, 6], graphCaption("Latency"),
-  graphSeriesColors([colorBrightCyan]))
-let right = plot([2, 3, 7, 4], graphCaption("Throughput"),
-  graphSeriesColors([colorBrightYellow]))
-
-echo multiplot([left, right], horizontalGap = 4)
-```
-
-Use `columns` to wrap plots into multiple rows. `columns = 0`, the default,
-places all plots on one row. `horizontalGap` controls spaces between plots and
-`verticalGap` controls blank lines between grid rows.
-
-For a responsive grid, use `MultiplotOptions`. `autoColumns` selects the
-largest number of columns that fits the available width; setting
-`availableWidth = 0` detects the terminal width each time the layout is
-rendered. An explicit width makes tests, snapshots, and redirected output
-deterministic:
-
-```nim
-var layout = initMultiplotOptions()
-layout.columns = autoColumns
-layout.availableWidth = 100
-layout.minimumCellWidth = 32
-layout.horizontalGap = 4
-layout.horizontalAlignment = mhaCenter
-layout.verticalAlignment = mvaMiddle
-
-echo multiplot([left, right], layout)
-```
-
-Use `fixedColumns(2)` to request two columns. Responsive layouts reduce that
-count when the tracks would exceed `availableWidth`, preventing the terminal
-from wrapping graph rows. Set `constrainToAvailableWidth = false` only when a
-strict column count and potentially over-wide output are intentional.
-`expandColumns` controls whether spare width is distributed across the shared
-column tracks. Horizontal alignment may be `mhaLeft`, `mhaCenter`, or
-`mhaRight`; vertical alignment may be `mvaTop`, `mvaMiddle`, or `mvaBottom`.
-Applications that prefer framework-style thresholds can override content-based
-auto-fit with order-independent breakpoints; the matching rule with the
-greatest minimum width wins:
-
-```nim
-layout.breakpoints = @[
-  multiplotBreakpoint(0, 1),
-  multiplotBreakpoint(80, 2),
-  multiplotBreakpoint(120, 3)
-]
-```
-
-Already-rendered strings can reflow into new rows but cannot resize themselves.
-If one is wider than the entire available width, the responsive grid clips its
-lines at ANSI- and Unicode-safe cell boundaries so the terminal never wraps a
-partial graph row. Deferred renderers avoid clipping by drawing at the assigned
-width in the first place.
-
-`multiplotResponsive` accepts deferred `MultiplotRenderer` callbacks and gives
-each callback its complete cell-width budget before assembling the grid:
-
-```nim
-var graph = initStaticGraph("Requests")
-let series = graph.addSeries("requests")
-graph.push(series, [12.0, 18.0, 15.0, 27.0])
-
-let renderGraph: MultiplotRenderer = proc(width: int): string =
-  graph.render(width = width, height = 10, showStats = false)
-
-echo multiplotResponsive([renderGraph], layout)
-```
-
-Auto-fit is recalculated on every call, so streaming dashboards can respond to
-terminal resizing without reconstructing their graph data. Renderers should
-honor the supplied budget. Content wider than its track is clipped by default;
-disable `constrainToAvailableWidth` to retain overflow.
-
-### 2D surfaces and contours
-
-`plotSurface` displays two matrix samples in each terminal cell using the
-foreground and background colors of a Unicode half block. `plotContour`
-renders quantized filled contour bands. Both accept rectangular matrices or
-flat row-major arrays and support resampling, captions, fixed or automatic
-ranges, custom ANSI-256 palettes, plain-text rendering, and scale legends:
-
-```nim
-import terminal_graphs
-
-let field = @[
-  @[0.0, 0.2, 0.5, 0.2],
-  @[0.1, 0.8, 1.0, 0.4],
-  @[0.0, 0.3, 0.6, 0.1]
-]
-
-var options = initSurfacePlotOptions()
-options.caption = "Temperature"
-options.width = 32
-options.height = 16
-options.contourLevels = 6
-
-echo plotSurface(field, options)
-echo plotContour(field, options)
-```
-
-Set `options.useColor = false` for logs or terminals without ANSI support.
-NaN values produce holes, while infinite values and malformed matrices raise
-`ValueError`. `plot2D` is a convenience alias for flat surface data.
-
-### Live graphs
-
-`LiveGraph` wraps a regular plotter with explicit terminal lifecycle methods.
-Always stop a live graph in a `finally` block so the cursor is restored:
-
-```nim
-import terminal_graphs
-
 var graph = initLiveGraph("Requests", unit = "req/s")
 let requests = graph.addSeries("requests", style = psFill, marker = "▄")
 
@@ -409,244 +102,123 @@ finally:
   graph.stopLive()
 ```
 
-Use `renderFrame()` when you want the live graph's rendered string without
-moving the cursor or writing to standard output.
+`renderFrame()` returns a frame without writing to the terminal. Use
+`LiveDashboard` to redraw an arbitrary full-screen frame, including responsive
+multiplot output, without leaving resized frames in scrollback.
 
-Use `LiveDashboard` for a full-screen application composed from arbitrary
-frames, including `multiplotResponsive` output. It clears and replaces the
-complete terminal frame on every draw, so resized physical rows from the prior
-frame cannot remain on screen. On POSIX terminals its alternate screen also
-keeps animation out of normal scrollback:
-
-```nim
-var dashboard = initLiveDashboard()
-dashboard.startLive()
-try:
-  let frame = multiplotResponsive(renderers, layout)
-  dashboard.draw(frame)
-finally:
-  dashboard.stopLive()
-```
-
-`LiveDashboard` deliberately does not install a process-wide signal handler;
-applications that handle Ctrl+C should request a normal loop exit so the
-`finally` block runs. The streaming multiplot example demonstrates this with a
-signal-safe atomic flag.
-
-For connected, colored streaming lines, use `LiveLineGraph`. It delegates each
-frame to the line renderer, so series colors, gradients, captions, legends,
-threshold colors, axes, and custom characters all remain available:
-
-```nim
-import terminal_graphs
-
-var config = initAsciiGraphConfig()
-config.height = 10
-config.caption = "Live sensors"
-config.seriesColors = @[colorCyan, colorBrightYellow]
-config.seriesLegends = @["temperature", "load"]
-
-var graph = initLiveLineGraph(
-  seriesCount = 2,
-  maxSamples = 60,
-  config = config
-)
-
-graph.startLive()
-try:
-  graph.push(0, 21.5)
-  graph.push(1, 48.0)
-  graph.draw()
-finally:
-  graph.stopLive()
-```
-
-Each series retains at most `maxSamples` values. `renderFrame()` is also
-available for testing or integration with `LiveDashboard` or another
-application-managed screen. Its direct `draw()` method preserves terminal
-content above the graph; use `LiveDashboard` when resize-safe full-screen
-replacement is preferred.
-
-### Terminal styles and colors
-
-Colors and ANSI-aware text layout are provided by the independent
-[`terminal_styles`](../terminal_styles/README.md) package and re-exported by
-the graph façade. It performs pure string transformation and never changes
-global terminal state. Concise color and attribute helpers accept mixed values
-like `echo` does:
-
-```nim
-import terminal_graphs
-
-echo bold(cyan("connected ", 42))
-echo bgBrightBlue(brightWhite(" healthy "))
-```
-
-For reusable styles, `TerminalStyle` combines a foreground, background, and a
-set of attributes into one escape sequence. Colors may come from the standard
-16-color palette, any ANSI-256 index, an RGB triplet, or a three/six-digit hex
-value:
-
-```nim
-let heading = initTerminalStyle(
-  foreground = hexColor("#78c8ff"),
-  background = indexedColor(17),
-  attributes = {taBold, taUnderline}
-)
-
-echo styled(heading, "Terminal graphs")
-echo rgb(255, 120, 40, "true color")
-echo onIndexed(235, brightYellow(" warning "))
-```
-
-Nested helpers restore their outer style after an inner reset. For redirected
-output, `applyStyle(text, heading, enabled = false)` removes both the requested
-style and ANSI sequences already present in `text`. `stripAnsi`,
-`displayWidth`, `sliceAnsi`, `truncateAnsi`, `padAnsi`, and `wrapAnsi` are
-available for ANSI-aware, Unicode-cell-aware layout. Graph color options use
-`TerminalColor`, so the same standard, indexed, RGB, and hexadecimal colors
-work throughout the library.
-
-The styling package has its own finite example and complete API guide:
-
-```sh
-cd ../terminal_styles
-nim c -r examples/terminal_styles.nim
-```
+On supported Windows consoles, live sessions enable virtual-terminal
+processing and restore the original console mode when they stop.
 
 ## Examples
 
-[`examples/all_graphs.nim`](examples/all_graphs.nim) is a finite tour of every
-graph family. Live and streaming graphs are rendered as snapshots, allowing
-the program to show the complete collection and then exit normally:
+Run any example with `nim r examples/<name>.nim`. The four live examples run
+until Ctrl+C; their animations below show them in action.
+
+<details>
+<summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>
+<p><a href="examples/images/all_graphs.png"><img src="examples/images/all_graphs.png" alt="Complete output of the all graphs example"></a></p>
+</details>
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line graph example output"></a><br>
+      <strong><a href="examples/line_graph.nim"><code>line_graph.nim</code></a></strong><br>
+      Axes, multiple series, legends, gradients, and thresholds.
+    </td>
+    <td width="50%">
+      <a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar graph example output"></a><br>
+      <strong><a href="examples/bar_graph.nim"><code>bar_graph.nim</code></a></strong><br>
+      Grouped and stacked bars with positive and negative values.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter graph example output"></a><br>
+      <strong><a href="examples/xy_graph.nim"><code>xy_graph.nim</code></a></strong><br>
+      An irregular connected line and a scatter plot.
+    </td>
+    <td width="50%">
+      <a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Sparkline example output"></a><br>
+      <strong><a href="examples/sparkline_graph.nim"><code>sparkline_graph.nim</code></a></strong><br>
+      Compact graphs, gaps, shared scales, and a color gradient.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Static filled terminal graph example output"></a><br>
+      <strong><a href="examples/static_graph.nim"><code>static_graph.nim</code></a></strong><br>
+      A deterministic, plain-text frame for logs and reports.
+    </td>
+    <td width="50%">
+      <a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot terminal dashboard example output"></a><br>
+      <strong><a href="examples/multiplot_graph.nim"><code>multiplot_graph.nim</code></a></strong><br>
+      A responsive dashboard of independently rendered graph types.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Two-dimensional surface and filled contour example output"></a><br>
+      <strong><a href="examples/advanced_graphs.nim"><code>advanced_graphs.nim</code></a></strong><br>
+      A high-resolution 2D surface and filled contours.
+    </td>
+  </tr>
+</table>
+
+### Live and streaming examples
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph"></a><br>
+      <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong><br>
+      Generated service metrics redrawn fluidly as a full terminal frame.
+    </td>
+    <td width="50%">
+      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph"></a><br>
+      <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong><br>
+      Two connected series in bounded streaming windows.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <a href="examples/streaming_multiplot_graph.nim"><img src="examples/images/streaming_multiplot_graph2.gif" alt="Animated responsive streaming multiplot dashboard"></a><br>
+      <strong><a href="examples/streaming_multiplot_graph.nim"><code>streaming_multiplot_graph.nim</code></a></strong><br>
+      Two live graphs in a resize-aware full-screen dashboard.
+    </td>
+    <td width="50%">
+      <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines"></a><br>
+      <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong><br>
+      A compact CPU and memory dashboard from reusable sparklines.
+    </td>
+  </tr>
+</table>
+
+Compile-check every example at once with:
 
 ```sh
-nim c -r examples/all_graphs.nim
+nimble examples
 ```
 
-The [`examples/multiplot_graph.nim`](examples/multiplot_graph.nim) program
-arranges line, bar, scatter, and contour renderings into a finite auto-fitting
-dashboard with aligned grid tracks:
+## Development and documentation
 
 ```sh
-nim r examples/multiplot_graph.nim
+nimble test       # run all test suites
+nimble examples   # compile-check all examples
+nimble docs       # generate htmldocs/ from public API comments
 ```
 
-The [`examples/streaming_multiplot_graph.nim`](examples/streaming_multiplot_graph.nim)
-program updates two independently buffered line graphs and redraws their
-combined multiplot frame. Its deferred renderers resize and reflow after a
-terminal-width change. It uses a fully redrawn alternate screen on supported
-terminals, preventing resized copies of older frames from cluttering the
-display or normal scrollback. Stop it with Ctrl+C:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development rules and
+[docs/public-api.md](docs/public-api.md) for the example coverage map.
 
-```sh
-nim r examples/streaming_multiplot_graph.nim
-```
+## Attribution and license
 
-The [`examples/bar_graph.nim`](examples/bar_graph.nim) program demonstrates
-colored grouped and stacked bars with positive and negative values:
+The connected line renderer is a Nim port inspired by
+[`guptarohit/asciigraph`](https://github.com/guptarohit/asciigraph). Other API
+and visualization ideas were inspired by
+[`OFThomas/drawIt`](https://gitlab.com/OFThomas/drawIt),
+[`Luteva-ssh/nivot`](https://github.com/Luteva-ssh/nivot), and
+[`sindresorhus/sparkly`](https://github.com/sindresorhus/sparkly). See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the required notice.
 
-```sh
-nim r examples/bar_graph.nim
-```
-
-The [`examples/xy_graph.nim`](examples/xy_graph.nim) program places an
-irregular line and scatter plot side by side:
-
-```sh
-nim r examples/xy_graph.nim
-```
-
-The [`examples/sparkline_graph.nim`](examples/sparkline_graph.nim) program
-embeds integer and floating-point sparklines in ordinary output:
-
-```sh
-nim r examples/sparkline_graph.nim
-```
-
-The [`examples/streaming_sparklines.nim`](examples/streaming_sparklines.nim) program
-combines bounded sample histories with colored sparklines to build a compact
-live dashboard. Stop it with Ctrl+C:
-
-```sh
-nim r examples/streaming_sparklines.nim
-```
-
-The [`examples/static_graph.nim`](examples/static_graph.nim) program renders one
-plain-text frame. Run it with:
-
-```sh
-nim r examples/static_graph.nim
-```
-
-The [`examples/live_graph.nim`](examples/live_graph.nim) program redraws a
-color graph using generated streaming data. Stop it with Ctrl+C:
-
-```sh
-nim r examples/live_graph.nim
-```
-
-[`examples/line_graph.nim`](examples/line_graph.nim) demonstrates axis
-formatters, interpolation, multiple colored series, legends, gradients, and
-threshold alerts:
-
-```sh
-nim r examples/line_graph.nim
-```
-
-[`examples/advanced_graphs.nim`](examples/advanced_graphs.nim) renders a
-colored surface and filled-contour plot side by side:
-
-```sh
-nim r examples/advanced_graphs.nim
-```
-
-[`examples/streaming_line_graph.nim`](examples/streaming_line_graph.nim) shows two
-connected colored series in a bounded streaming window. Stop it with Ctrl+C:
-
-```sh
-nim r examples/streaming_line_graph.nim
-```
-
-All examples can be compile-checked together with `nimble examples`.
-
-## Tests and generated API documentation
-
-Run the unit tests:
-
-```sh
-nimble test
-```
-
-Generate browsable API documentation from the module's doc comments:
-
-```sh
-nimble docs
-```
-
-The task runs Nim's project documentation generator and places the façade and
-submodule HTML under `htmldocs/`.
-
-## Attribution
-
-The connected ASCII line renderer is a Nim port inspired by the BSD-licensed
-Go project `guptarohit/asciigraph`. The required copyright and license text is
-included in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-
-The multiplot, surface, contour, and live-display direction was also inspired
-by the feature set demonstrated by [`OFThomas/drawIt`](https://gitlab.com/OFThomas/drawIt).
-This package's implementation is independent and uses only Nim terminal output.
-
-The bar and explicit-coordinate XY APIs were inspired by the visualization
-ideas in [`Luteva-ssh/nivot`](https://github.com/Luteva-ssh/nivot). Their
-implementations were written independently for this package's typed, validated,
-color-capable rendering model.
-
-Sparkline ranges, gaps, and fire-gradient styling were inspired by
-[`sindresorhus/sparkly`](https://github.com/sindresorhus/sparkly). The Nim API
-and renderer are independent and add typed options, custom palettes and ticks,
-validated bounds, safe clamping, and explicit constant-series behavior.
-
-The example coverage audit is in [`docs/public-api.md`](docs/public-api.md).
-Release history, contribution rules, third-party declarations, and the release
-procedure live in `CHANGELOG.md`, `CONTRIBUTING.md`, and `RELEASING.md`.
+`terminal_graphs` is released under the [MIT License](LICENSE).

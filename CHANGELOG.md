@@ -5,17 +5,39 @@ release.
 
 ## [0.1.0] - Unreleased
 
+### Added
+
 - Add asciigraph-style single- and multi-series line charts.
 - Add horizontal grouped and stacked bar charts.
 - Add scatter plots and connected irregular XY charts with zero-crossing axes.
 - Add bounded static and streaming graph models.
 - Add compact and streaming sparklines with custom palettes and gaps.
 - Add responsive multiplot grids, surfaces, and filled contours.
-- Keep responsive grids within the detected terminal width by reflowing
-  fixed/breakpoint columns, clipping irreducibly wide plots at ANSI-safe cell
-  boundaries, and isolating multiline styles between cells.
+- Add deferred `MultiplotRenderer` callbacks so graphs can render directly at
+  their assigned responsive-grid width.
 - Add a reusable `LiveDashboard` full-screen lifecycle with resize-safe redraws
-  and POSIX alternate-screen support; use it in the streaming multiplot example
-  so rewrapped fragments of older frames cannot remain visible.
+  and POSIX alternate-screen support.
 - Re-export the shared `terminal_styles` API from the library façade.
+
+### Changed
+
+- Constrain responsive grids to the detected terminal width by default.
+- Reflow fixed and breakpoint column layouts when their requested column count
+  no longer fits the available width.
+- Update graph examples to use responsive layouts instead of hard-coded
+  terminal widths.
+- Use `LiveDashboard` in the streaming multiplot example so each frame fully
+  replaces the previous frame and animated output stays out of scrollback.
 - Support Nim 2.0.0 and newer.
+
+### Fixed
+
+- Prevent terminal resizing from wrapping partial graph lines by clipping
+  irreducibly wide plots at ANSI- and Unicode-safe cell boundaries.
+- Isolate ANSI styles and hyperlinks between multiline grid cells to prevent
+  formatting from leaking into neighboring plots.
+- Align each plot as one rectangular block for centered and right-aligned
+  multiplots, keeping axes and graph canvases straight when lines have
+  different lengths.
+- Clear the complete live-dashboard frame after a resize so fragments of older
+  frames do not remain above the current streaming graphs.

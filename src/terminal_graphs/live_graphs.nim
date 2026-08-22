@@ -11,97 +11,205 @@
 
 import std/[deques, math, sequtils, strutils, terminal]
 
+when defined(windows):
+  import std/winlean
+
 import ./[line_graphs, static_graphs]
 
 export line_graphs, static_graphs
 
+type LiveTerminalSession = object
+  output: File
+  active: bool
+  usingAlternateScreen: bool
+  usingVtSequences: bool
+  when defined(windows):
+    windowsConsoleHandle: Handle
+    windowsOriginalMode: DWORD
+    windowsModeChanged: bool
+
 type LiveGraph* = object
-  ## A plotter configured for repeated, in-place terminal rendering.
+  ## A plotter configured for repeated full-screen terminal rendering.
   plotter*: Plotter
   width*: int
   height*: int
   useColor*: bool
   showStats*: bool
-  active: bool
+  session: LiveTerminalSession
 
 type LiveDashboard* = object
   ## Full-screen terminal lifecycle for an arbitrary rendered frame.
   ##
   ## Every draw clears the complete screen from its home position, so old
   ## physical rows cannot survive when a terminal resize rewraps the previous
-  ## frame. On POSIX terminals, ``alternateScreen`` keeps animation frames out
-  ## of the application's normal screen and scrollback.
+  ## frame. On VT-capable terminals, ``alternateScreen`` keeps animation
+  ## frames out of the application's normal screen and scrollback.
   alternateScreen*: bool
-  output: File
-  active: bool
-  usingAlternateScreen: bool
+  session: LiveTerminalSession
 
 type LiveLineGraph* = object
   ## A bounded collection of series rendered repeatedly by ``plotMany``.
   config*: AsciiGraphConfig
   sampleLimit*: int
   series: seq[Deque[float64]]
-  active: bool
+  session: LiveTerminalSession
   previousFrameLines: int
+
+when defined(windows):
+  const
+    enableProcessedOutput = DWORD(0x0001)
+    enableVirtualTerminalProcessing = DWORD(0x0004)
+
+  proc getConsoleMode(handle: Handle; mode: ptr DWORD): WINBOOL {.
+      stdcall, dynlib: "kernel32", importc: "GetConsoleMode".}
+
+  proc setConsoleMode(handle: Handle; mode: DWORD): WINBOOL {.
+      stdcall, dynlib: "kernel32", importc: "SetConsoleMode".}
+
+  proc enableWindowsVt(session: var LiveTerminalSession): bool =
+    if not session.output.isatty or
+        (session.output != stdout and session.output != stderr):
+      return false
+    let handle = getStdHandle(
+      if session.output == stderr: STD_ERROR_HANDLE else: STD_OUTPUT_HANDLE)
+    if handle == INVALID_HANDLE_VALUE:
+      return false
+    var originalMode: DWORD
+    if getConsoleMode(handle, addr originalMode) == 0:
+      return false
+    let requestedMode = originalMode or enableProcessedOutput or
+      enableVirtualTerminalProcessing
+    if requestedMode != originalMode and
+        setConsoleMode(handle, requestedMode) == 0:
+      return false
+    session.windowsConsoleHandle = handle
+    session.windowsOriginalMode = originalMode
+    session.windowsModeChanged = requestedMode != originalMode
+    true
+
+  proc restoreWindowsConsoleMode(session: var LiveTerminalSession) =
+    if session.windowsModeChanged:
+      discard setConsoleMode(session.windowsConsoleHandle,
+        session.windowsOriginalMode)
+    session.windowsModeChanged = false
+
+proc initLiveTerminalSession(output: File): LiveTerminalSession =
+  LiveTerminalSession(output: output)
+
+proc fullScreenSequence(frame: string): string =
+  ## Paints a frame before erasing unused line tails and obsolete lower rows.
+  ## Publishing this as one write avoids a visible blank frame between the
+  ## clear and redraw, especially with the Windows console host.
+  result = "\e[H"
+  if frame.len == 0:
+    result.add "\e[J"
+    return
+  let lines = frame.splitLines()
+  for index, line in lines:
+    result.add line
+    if index == lines.high:
+      result.add "\e[J"
+    else:
+      result.add "\e[K"
+      result.add '\n'
+
+proc startSession(session: var LiveTerminalSession; clearScreen,
+                  alternateScreen: bool) =
+  if session.active:
+    return
+  if session.output == nil:
+    session.output = stdout
+  when defined(posix):
+    session.usingVtSequences = true
+  elif defined(windows):
+    session.usingVtSequences = session.enableWindowsVt()
+
+  if alternateScreen and session.output.isatty and
+      session.usingVtSequences:
+    session.output.write "\e[?1049h"
+    session.usingAlternateScreen = true
+  if clearScreen:
+    if session.usingVtSequences:
+      session.output.write "\e[2J\e[H"
+    else:
+      session.output.setCursorPos(0, 0)
+      session.output.eraseScreen()
+  if session.usingVtSequences:
+    session.output.write "\e[?25l"
+  else:
+    session.output.hideCursor()
+  session.output.flushFile()
+  session.active = true
+
+proc drawFullScreen(session: LiveTerminalSession; frame: string) =
+  if session.usingVtSequences:
+    session.output.write frame.fullScreenSequence()
+  else:
+    session.output.setCursorPos(0, 0)
+    session.output.eraseScreen()
+    session.output.write frame
+  session.output.flushFile()
+
+proc stopSession(session: var LiveTerminalSession) =
+  if not session.active:
+    return
+  if session.usingVtSequences:
+    session.output.write "\e[0m"
+    if session.usingAlternateScreen:
+      session.output.write "\e[?1049l"
+    session.output.write "\e[?25h"
+  else:
+    session.output.resetAttributes()
+    session.output.showCursor()
+  session.output.flushFile()
+  when defined(windows):
+    session.restoreWindowsConsoleMode()
+  session.active = false
+  session.usingAlternateScreen = false
+  session.usingVtSequences = false
 
 proc initLiveDashboard*(alternateScreen = true;
                         output: File = stdout): LiveDashboard =
   ## Creates a side-effect-free full-screen dashboard controller.
   ##
   ## ``output`` defaults to standard output and is retained for the complete
-  ## lifecycle. Alternate-screen mode is enabled only for a POSIX TTY; other
-  ## outputs still receive deterministic full-screen redraws.
+  ## lifecycle. Alternate-screen mode is enabled only for a VT-capable TTY;
+  ## other outputs still receive deterministic full-screen redraws.
   if output == nil:
     raise newException(ValueError, "live dashboard output cannot be nil")
-  LiveDashboard(alternateScreen: alternateScreen, output: output)
+  LiveDashboard(
+    alternateScreen: alternateScreen,
+    session: initLiveTerminalSession(output)
+  )
 
 proc isActive*(dashboard: LiveDashboard): bool =
   ## Returns whether the dashboard owns the configured terminal output.
-  dashboard.active
+  dashboard.session.active
 
 proc startLive*(dashboard: var LiveDashboard) =
   ## Enters full-screen mode and hides the cursor.
   ##
   ## Calling this procedure again while active has no effect.
-  if dashboard.active:
-    return
-  when defined(posix):
-    if dashboard.alternateScreen and dashboard.output.isatty:
-      dashboard.output.write "\e[?1049h"
-      dashboard.usingAlternateScreen = true
-  dashboard.output.setCursorPos(0, 0)
-  dashboard.output.eraseScreen()
-  dashboard.output.hideCursor()
-  dashboard.output.flushFile()
-  dashboard.active = true
+  dashboard.session.startSession(
+    clearScreen = true,
+    alternateScreen = dashboard.alternateScreen
+  )
 
 proc draw*(dashboard: LiveDashboard; frame: string) =
   ## Clears and replaces the complete dashboard frame.
   ##
   ## Full redraws deliberately avoid saved logical line counts: after a resize,
   ## a terminal may have rewrapped each old line into several physical rows.
-  if not dashboard.active:
+  if not dashboard.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live dashboard")
-  dashboard.output.setCursorPos(0, 0)
-  dashboard.output.eraseScreen()
-  dashboard.output.write frame
-  dashboard.output.flushFile()
+  dashboard.session.drawFullScreen(frame)
 
 proc stopLive*(dashboard: var LiveDashboard) =
   ## Restores attributes, the normal screen, and cursor visibility.
   ##
   ## Calling this procedure for an inactive dashboard has no effect.
-  if not dashboard.active:
-    return
-  dashboard.output.resetAttributes()
-  when defined(posix):
-    if dashboard.usingAlternateScreen:
-      dashboard.output.write "\e[?1049l"
-  dashboard.output.showCursor()
-  dashboard.output.flushFile()
-  dashboard.active = false
-  dashboard.usingAlternateScreen = false
+  dashboard.session.stopSession()
 
 proc initLiveGraph*(title: string; unit = "";
                     maxSamples = DefaultMaxSamples; width = 0; height = 0;
@@ -116,7 +224,7 @@ proc initLiveGraph*(title: string; unit = "";
     height: height,
     useColor: useColor,
     showStats: showStats,
-    active: false
+    session: initLiveTerminalSession(stdout)
   )
 
 proc addSeries*(graph: var LiveGraph; name: string; style = psLine;
@@ -156,39 +264,30 @@ proc renderFrame*(graph: LiveGraph): string =
 
 proc isActive*(graph: LiveGraph): bool =
   ## Returns whether ``startLive`` has been called without a matching stop.
-  graph.active
+  graph.session.active
 
 proc startLive*(graph: var LiveGraph; clearScreen = true) =
   ## Hides the cursor and optionally clears the terminal before live drawing.
   ##
   ## Calling this procedure again while the graph is active has no effect.
-  if graph.active:
-    return
-  hideCursor()
-  if clearScreen:
-    eraseScreen()
-  graph.active = true
+  graph.session.startSession(
+    clearScreen = clearScreen,
+    alternateScreen = false
+  )
 
 proc draw*(graph: LiveGraph) =
   ## Replaces the current terminal frame with the latest graph contents.
   ##
   ## Raises ``ValueError`` if ``startLive`` has not been called.
-  if not graph.active:
+  if not graph.session.active:
     raise newException(ValueError, "call startLive before drawing a live graph")
-  setCursorPos(0, 0)
-  eraseScreen()
-  stdout.write graph.renderFrame()
-  stdout.flushFile()
+  graph.session.drawFullScreen(graph.renderFrame())
 
 proc stopLive*(graph: var LiveGraph) =
   ## Restores terminal attributes and cursor visibility.
   ##
   ## Calling this procedure for an inactive graph has no effect.
-  if not graph.active:
-    return
-  resetAttributes()
-  showCursor()
-  graph.active = false
+  graph.session.stopSession()
 
 proc initLiveLineGraph*(seriesCount = 1; maxSamples = 80;
                         config = initAsciiGraphConfig()): LiveLineGraph =
@@ -201,7 +300,7 @@ proc initLiveLineGraph*(seriesCount = 1; maxSamples = 80;
     config: config,
     sampleLimit: maxSamples,
     series: newSeqWith(seriesCount, initDeque[float64]()),
-    active: false,
+    session: initLiveTerminalSession(stdout),
     previousFrameLines: 0
   )
 
@@ -260,38 +359,37 @@ proc renderFrame*(graph: LiveLineGraph): string =
 
 proc isActive*(graph: LiveLineGraph): bool =
   ## Returns whether the streaming display is active.
-  graph.active
+  graph.session.active
 
 proc startLive*(graph: var LiveLineGraph; clearScreen = true) =
   ## Starts a streaming line display and hides the terminal cursor.
-  if graph.active:
+  if graph.session.active:
     return
-  hideCursor()
-  if clearScreen:
-    eraseScreen()
-  graph.active = true
+  graph.session.startSession(
+    clearScreen = clearScreen,
+    alternateScreen = false
+  )
   graph.previousFrameLines = 0
 
 proc draw*(graph: var LiveLineGraph) =
   ## Redraws the streaming line graph, preserving content above it.
-  if not graph.active:
+  if not graph.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live line graph")
   let frame = graph.renderFrame()
   if frame.len == 0:
     return
-  if graph.previousFrameLines > 0:
-    stdout.write clearLinesSequence(graph.previousFrameLines)
-  stdout.write frame
-  stdout.write '\n'
-  stdout.flushFile()
+  var update = if graph.previousFrameLines > 0:
+      clearLinesSequence(graph.previousFrameLines)
+    else:
+      ""
+  update.add frame
+  update.add '\n'
+  graph.session.output.write update
+  graph.session.output.flushFile()
   graph.previousFrameLines = frame.splitLines().len
 
 proc stopLive*(graph: var LiveLineGraph) =
   ## Stops streaming and restores terminal attributes and cursor visibility.
-  if not graph.active:
-    return
-  resetAttributes()
-  showCursor()
-  graph.active = false
+  graph.session.stopSession()
   graph.previousFrameLines = 0
