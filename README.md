@@ -8,20 +8,10 @@ The package renders strings with Unicode and ANSI styling—there is no Python
 runtime or external plotting backend. Importing `terminal_graphs` has no side
 effects and does not change terminal state.
 
-<table>
-  <tr>
-    <td width="50%">
-      <a href="examples/live_graph.nim">
-        <img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph">
-      </a>
-    </td>
-    <td width="50%">
-      <a href="examples/streaming_line_graph.nim">
-        <img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph">
-      </a>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="240"></a>
+  <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" height="240"></a>
+</p>
 
 ## Platform support
 
@@ -179,12 +169,12 @@ until Ctrl+C; their animations below show them in action.
 <table>
   <tr>
     <td width="50%">
-      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph"></a><br>
+      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="240"></a><br>
       <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong><br>
       Generated service metrics redrawn fluidly as a full terminal frame.
     </td>
     <td width="50%">
-      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph"></a><br>
+      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph" height="240"></a><br>
       <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong><br>
       Two connected series in bounded streaming windows.
     </td>
