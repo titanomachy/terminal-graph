@@ -1,4 +1,4 @@
-# terminal_graphs
+# TerminalGraphs
 
 Pure-Nim terminal charts: connected lines, horizontal bars, irregular XY and
 scatter plots, static and live graphs, responsive multiplot dashboards, 2D
@@ -21,10 +21,17 @@ effects and does not change terminal state.
   </tr>
 </table>
 
-## Requirements and installation
+## Platform support
+
+TerminalGraphs has been tested on Linux and Windows. It should also work on
+macOS through its standard POSIX terminal and ANSI/VT support, but macOS has not
+yet been tested directly.
+
+## Requirements
 
 - Nim 2.0.0 or newer
-- `terminal_styles` 0.1.0 or newer
+- [`terminal_styles`](https://github.com/titanomachy/terminal-styles) 0.1.0 or newer, installed from GitHub
+- No runtime dependencies beyond `terminal_styles`
 
 Until the first release, install from a checkout:
 

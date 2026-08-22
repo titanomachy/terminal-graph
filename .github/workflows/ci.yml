@@ -22,6 +22,8 @@ jobs:
         with:
           nim-version: ${{ matrix.nim }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install terminal_styles from GitHub
+        run: nimble install -y https://github.com/titanomachy/terminal-styles
       - run: nimble check
       - run: nimble test -y
       - run: nimble examples -y
