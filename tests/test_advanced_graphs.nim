@@ -1,4 +1,4 @@
-import std/[math, sequtils, strutils, unittest]
+import std/[math, os, sequtils, strutils, tempfiles, unittest]
 
 import terminal_graphs
 
@@ -297,6 +297,43 @@ suite "colored live line graphs":
     check graph.renderFrame().len > 0
     graph.clear()
     check graph.renderFrame() == ""
+
+  when defined(posix):
+    test "repaints before erasing stale rows":
+      let (output, path) = createTempFile(
+        "terminal_graphs_live_line_", ".txt")
+      var outputOpen = true
+      defer:
+        if outputOpen:
+          output.close()
+        if path.fileExists:
+          path.removeFile()
+
+      var config = initAsciiGraphConfig()
+      config.width = 8
+      config.height = 2
+      var graph = initLiveLineGraph(
+        maxSamples = 3,
+        config = config,
+        output = output
+      )
+      graph.push(0, 1.0)
+      let firstLineCount = graph.renderFrame().splitLines().len
+
+      graph.startLive()
+      graph.draw()
+      graph.push(0, 2.0)
+      graph.draw()
+      graph.stopLive()
+
+      output.close()
+      outputOpen = false
+      let emitted = path.readFile()
+      let repaint = "\e[" & $firstLineCount & "A\r"
+      check repaint in emitted
+      check ("\e[" & $firstLineCount & "A\e[J") notin emitted
+      check "\e[K\n" in emitted
+      check emitted.endsWith("\e[0m\e[?25h")
 
 suite "terminal styling façade":
   test "exports styling helpers from terminal_graphs":

@@ -290,17 +290,20 @@ proc stopLive*(graph: var LiveGraph) =
   graph.session.stopSession()
 
 proc initLiveLineGraph*(seriesCount = 1; maxSamples = 80;
-                        config = initAsciiGraphConfig()): LiveLineGraph =
+                        config = initAsciiGraphConfig();
+                        output: File = stdout): LiveLineGraph =
   ## Creates a colored streaming line graph without touching terminal state.
   if seriesCount <= 0:
     raise newException(ValueError, "seriesCount must be greater than zero")
   if maxSamples <= 0:
     raise newException(ValueError, "maxSamples must be greater than zero")
+  if output == nil:
+    raise newException(ValueError, "live line graph output cannot be nil")
   LiveLineGraph(
     config: config,
     sampleLimit: maxSamples,
     series: newSeqWith(seriesCount, initDeque[float64]()),
-    session: initLiveTerminalSession(stdout),
+    session: initLiveTerminalSession(output),
     previousFrameLines: 0
   )
 
@@ -371,6 +374,22 @@ proc startLive*(graph: var LiveLineGraph; clearScreen = true) =
   )
   graph.previousFrameLines = 0
 
+proc inPlaceSequence(frame: string; previousFrameLines: int): string =
+  ## Repaints an anchored frame before erasing stale line tails and lower rows.
+  ## Keeping the update in this order prevents Windows terminals from showing
+  ## the cleared graph between two successive frames.
+  if previousFrameLines > 0:
+    result.add "\e[" & $previousFrameLines & "A"
+  result.add '\r'
+  let lines = frame.splitLines()
+  for index, line in lines:
+    result.add line
+    if index == lines.high:
+      result.add "\e[J"
+    else:
+      result.add "\e[K\n"
+  result.add '\n'
+
 proc draw*(graph: var LiveLineGraph) =
   ## Redraws the streaming line graph, preserving content above it.
   if not graph.session.active:
@@ -379,12 +398,7 @@ proc draw*(graph: var LiveLineGraph) =
   let frame = graph.renderFrame()
   if frame.len == 0:
     return
-  var update = if graph.previousFrameLines > 0:
-      clearLinesSequence(graph.previousFrameLines)
-    else:
-      ""
-  update.add frame
-  update.add '\n'
+  let update = frame.inPlaceSequence(graph.previousFrameLines)
   graph.session.output.write update
   graph.session.output.flushFile()
   graph.previousFrameLines = frame.splitLines().len
