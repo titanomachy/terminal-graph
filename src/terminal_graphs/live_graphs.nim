@@ -98,20 +98,20 @@ proc initLiveTerminalSession(output: File): LiveTerminalSession =
 
 proc fullScreenSequence(frame: string): string =
   ## Paints a frame before erasing unused line tails and obsolete lower rows.
-  ## Publishing this as one write avoids a visible blank frame between the
-  ## clear and redraw, especially with the Windows console host.
-  result = "\e[H"
+  ## Synchronized output prevents supporting terminals from presenting the
+  ## frame while they are still parsing this update.
+  var update = "\e[H"
   if frame.len == 0:
-    result.add "\e[J"
-    return
-  let lines = frame.splitLines()
-  for index, line in lines:
-    result.add line
-    if index == lines.high:
-      result.add "\e[J"
-    else:
-      result.add "\e[K"
-      result.add '\n'
+    update.add "\e[J"
+  else:
+    let lines = frame.splitLines()
+    for index, line in lines:
+      update.add line
+      if index == lines.high:
+        update.add "\e[J"
+      else:
+        update.add "\e[K\r\n"
+  result = update.synchronizedOutputSequence()
 
 proc startSession(session: var LiveTerminalSession; clearScreen,
                   alternateScreen: bool) =
@@ -154,7 +154,9 @@ proc stopSession(session: var LiveTerminalSession) =
   if not session.active:
     return
   if session.usingVtSequences:
-    session.output.write "\e[0m"
+    # Cancel a possibly interrupted synchronized update before restoring the
+    # rest of the terminal state.
+    session.output.write "\e[?2026l\e[0m"
     if session.usingAlternateScreen:
       session.output.write "\e[?1049l"
     session.output.write "\e[?25h"

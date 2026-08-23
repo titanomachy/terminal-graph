@@ -2,7 +2,7 @@
 ## Stop it with Ctrl+C.
 
 when isMainModule:
-  import std/[math, os, random, strutils, terminal]
+  import std/[atomics, math, os, random]
 
   import ../src/terminal_graphs
 
@@ -15,16 +15,22 @@ when isMainModule:
 
   randomize()
 
+  var stopRequested: Atomic[bool]
+
+  proc requestStop() {.noconv.} =
+    ## A signal handler may only perform signal-safe work.
+    stopRequested.store(true)
+
   var
     cpuHistory: seq[float64]
     memoryHistory: seq[float64]
     step = 0.0
-    previousFrameLines = 0
+    dashboard = initLiveDashboard()
 
-  echo ""
-  hideCursor()
+  dashboard.startLive()
+  setControlCHook(requestStop)
   try:
-    while true:
+    while not stopRequested.load():
       step += 0.06
       cpuHistory.pushSample(
         clamp(52.0 + sin(step) * 28.0 + rand(8.0) - 4.0, 0.0, 100.0)
@@ -33,18 +39,18 @@ when isMainModule:
         clamp(64.0 + cos(step * 0.45) * 12.0 + rand(3.0), 0.0, 100.0)
       )
 
-      let frame = cyan("CPU     ", sparkline(cpuHistory),
+      # Keep one blank row above the dashboard for a clean video crop.
+      let frame = "\n" & cyan("CPU     ", sparkline(cpuHistory),
           "  ", cpuHistory[^1].int, "%") & '\n' &
         yellow("Memory  ", sparkline(memoryHistory),
           "  ", memoryHistory[^1].int, "%")
-      stdout.write frame.replaceLinesSequence(previousFrameLines)
-      stdout.flushFile()
+      dashboard.draw(frame)
 
-      previousFrameLines = frame.splitLines().len
       sleep(33)
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard
   finally:
-    resetAttributes()
-    showCursor()
+    when declared(unsetControlCHook):
+      unsetControlCHook()
+    dashboard.stopLive()

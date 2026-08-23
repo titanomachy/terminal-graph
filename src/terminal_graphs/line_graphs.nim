@@ -746,6 +746,14 @@ proc clearLinesSequence*(lineCount: int): string =
   else:
     ""
 
+proc synchronizedOutputSequence*(update: string): string =
+  ## Wraps a terminal update in DEC synchronized-output mode.
+  ##
+  ## Supporting terminals hold rendering until the closing sequence, so a
+  ## complete frame becomes visible at once. Unsupported terminals ignore the
+  ## private mode and process ``update`` normally.
+  "\e[?2026h" & update & "\e[?2026l"
+
 proc replaceLinesSequence*(frame: string; previousLineCount: int): string =
   ## Returns an ANSI update that replaces a previously rendered frame.
   ##
@@ -755,20 +763,22 @@ proc replaceLinesSequence*(frame: string; previousLineCount: int): string =
   if previousLineCount < 0:
     raise newException(ValueError,
       "previousLineCount cannot be negative")
+  var update: string
   if previousLineCount > 0:
-    result.add &"\e[{previousLineCount}A"
-  result.add '\r'
+    update.add &"\e[{previousLineCount}A"
+  update.add '\r'
   let lines = frame.splitLines()
   if lines.len == 0:
-    result.add "\e[J\n"
-    return
-  for index, line in lines:
-    result.add line
-    if index == lines.high:
-      result.add "\e[J"
-    else:
-      result.add "\e[K\n"
-  result.add '\n'
+    update.add "\e[J"
+  else:
+    for index, line in lines:
+      update.add line
+      if index == lines.high:
+        update.add "\e[J"
+      else:
+        update.add "\e[K\r\n"
+  update.add "\r\n"
+  result = update.synchronizedOutputSequence()
 
 proc clearLines*(lineCount: int) =
   ## Clears recently rendered lines while preserving terminal content above.

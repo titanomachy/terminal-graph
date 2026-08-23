@@ -174,8 +174,10 @@ suite "ASCII line graphs":
 
   test "replaces lines before erasing stale content":
     check replaceLinesSequence("new\nframe", 2) ==
-      "\e[2A\rnew\e[K\nframe\e[J\n"
-    check replaceLinesSequence("first", 0) == "\rfirst\e[J\n"
-    check replaceLinesSequence("", 1) == "\e[1A\r\e[J\n"
+      "\e[?2026h\e[2A\rnew\e[K\r\nframe\e[J\r\n\e[?2026l"
+    check replaceLinesSequence("first", 0) ==
+      "\e[?2026h\rfirst\e[J\r\n\e[?2026l"
+    check replaceLinesSequence("", 1) ==
+      "\e[?2026h\e[1A\r\e[J\r\n\e[?2026l"
     expect ValueError:
       discard replaceLinesSequence("frame", -1)

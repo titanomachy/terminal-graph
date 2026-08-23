@@ -12,6 +12,7 @@ effects and does not change terminal state.
   <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" width="45%"></a>
   <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" width="51.45%"></a>
 </p>
+<p align="center"><a href="#examples">More examples</a></p>
 
 ## Platform support
 

@@ -254,6 +254,7 @@ suite "terminal_graphs live display":
       check dashboard.isActive
       dashboard.draw("first row\nsecond row")
       dashboard.draw("responsive frame")
+      dashboard.draw("")
       dashboard.stopLive()
       dashboard.stopLive() # Stopping twice is intentionally idempotent.
       check not dashboard.isActive
@@ -264,8 +265,12 @@ suite "terminal_graphs live display":
       outputOpen = false
       let emitted = path.readFile()
       check emitted.startsWith("\e[2J\e[H\e[?25l")
-      check "\e[Hfirst row\e[K\nsecond row\e[J" in emitted
+      check "\e[?2026h\e[Hfirst row\e[K\r\nsecond row\e[J\e[?2026l" in
+        emitted
       check "\e[Hresponsive frame\e[J" in emitted
+      check "\e[?2026h\e[H\e[J\e[?2026l" in emitted
+      check emitted.count("\e[?2026h") == 3
+      check emitted.count("\e[?2026l") == 4
       check "\e[2K" notin emitted
       check emitted.endsWith("\e[0m\e[?25h")
 

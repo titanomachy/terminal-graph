@@ -332,7 +332,9 @@ suite "colored live line graphs":
       let repaint = "\e[" & $firstLineCount & "A\r"
       check repaint in emitted
       check ("\e[" & $firstLineCount & "A\e[J") notin emitted
-      check "\e[K\n" in emitted
+      check "\e[?2026h" in emitted
+      check "\e[K\r\n" in emitted
+      check "\e[?2026l" in emitted
       check emitted.endsWith("\e[0m\e[?25h")
 
 suite "terminal styling façade":
