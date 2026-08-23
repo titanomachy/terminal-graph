@@ -2,7 +2,7 @@
 ## Stop it with Ctrl+C.
 
 when isMainModule:
-  import std/[math, os, random, terminal]
+  import std/[math, os, random, strutils, terminal]
 
   import ../src/terminal_graphs
 
@@ -19,7 +19,7 @@ when isMainModule:
     cpuHistory: seq[float64]
     memoryHistory: seq[float64]
     step = 0.0
-    hasPreviousFrame = false
+    previousFrameLines = 0
 
   echo ""
   hideCursor()
@@ -33,18 +33,14 @@ when isMainModule:
         clamp(64.0 + cos(step * 0.45) * 12.0 + rand(3.0), 0.0, 100.0)
       )
 
-      if hasPreviousFrame:
-        stdout.write clearLinesSequence(2)
-
-      stdout.write cyan("CPU     ", sparkline(cpuHistory),
-        "  ", cpuHistory[^1].int, "%")
-      stdout.write '\n'
-      stdout.write yellow("Memory  ", sparkline(memoryHistory),
-        "  ", memoryHistory[^1].int, "%")
-      stdout.write '\n'
+      let frame = cyan("CPU     ", sparkline(cpuHistory),
+          "  ", cpuHistory[^1].int, "%") & '\n' &
+        yellow("Memory  ", sparkline(memoryHistory),
+          "  ", memoryHistory[^1].int, "%")
+      stdout.write frame.replaceLinesSequence(previousFrameLines)
       stdout.flushFile()
 
-      hasPreviousFrame = true
+      previousFrameLines = frame.splitLines().len
       sleep(33)
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
