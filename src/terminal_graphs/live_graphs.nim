@@ -374,22 +374,6 @@ proc startLive*(graph: var LiveLineGraph; clearScreen = true) =
   )
   graph.previousFrameLines = 0
 
-proc inPlaceSequence(frame: string; previousFrameLines: int): string =
-  ## Repaints an anchored frame before erasing stale line tails and lower rows.
-  ## Keeping the update in this order prevents Windows terminals from showing
-  ## the cleared graph between two successive frames.
-  if previousFrameLines > 0:
-    result.add "\e[" & $previousFrameLines & "A"
-  result.add '\r'
-  let lines = frame.splitLines()
-  for index, line in lines:
-    result.add line
-    if index == lines.high:
-      result.add "\e[J"
-    else:
-      result.add "\e[K\n"
-  result.add '\n'
-
 proc draw*(graph: var LiveLineGraph) =
   ## Redraws the streaming line graph, preserving content above it.
   if not graph.session.active:
@@ -398,7 +382,7 @@ proc draw*(graph: var LiveLineGraph) =
   let frame = graph.renderFrame()
   if frame.len == 0:
     return
-  let update = frame.inPlaceSequence(graph.previousFrameLines)
+  let update = frame.replaceLinesSequence(graph.previousFrameLines)
   graph.session.output.write update
   graph.session.output.flushFile()
   graph.previousFrameLines = frame.splitLines().len

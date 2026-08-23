@@ -746,6 +746,30 @@ proc clearLinesSequence*(lineCount: int): string =
   else:
     ""
 
+proc replaceLinesSequence*(frame: string; previousLineCount: int): string =
+  ## Returns an ANSI update that replaces a previously rendered frame.
+  ##
+  ## The new lines are painted before their stale tails and any obsolete lower
+  ## rows are erased. This avoids exposing a cleared intermediate frame, which
+  ## can appear as flicker or black scan lines on some terminals.
+  if previousLineCount < 0:
+    raise newException(ValueError,
+      "previousLineCount cannot be negative")
+  if previousLineCount > 0:
+    result.add &"\e[{previousLineCount}A"
+  result.add '\r'
+  let lines = frame.splitLines()
+  if lines.len == 0:
+    result.add "\e[J\n"
+    return
+  for index, line in lines:
+    result.add line
+    if index == lines.high:
+      result.add "\e[J"
+    else:
+      result.add "\e[K\n"
+  result.add '\n'
+
 proc clearLines*(lineCount: int) =
   ## Clears recently rendered lines while preserving terminal content above.
   stdout.write clearLinesSequence(lineCount)

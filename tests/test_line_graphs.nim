@@ -171,3 +171,11 @@ suite "ASCII line graphs":
   test "builds terminal clearing sequences":
     check clearLinesSequence(0) == ""
     check clearLinesSequence(5) == "\e[5A\e[J"
+
+  test "replaces lines before erasing stale content":
+    check replaceLinesSequence("new\nframe", 2) ==
+      "\e[2A\rnew\e[K\nframe\e[J\n"
+    check replaceLinesSequence("first", 0) == "\rfirst\e[J\n"
+    check replaceLinesSequence("", 1) == "\e[1A\r\e[J\n"
+    expect ValueError:
+      discard replaceLinesSequence("frame", -1)
