@@ -32,12 +32,18 @@ suite "horizontal bar graphs":
     check "A / actual" in grouped
     check ansiCode(colorBrightCyan) in grouped
     check ansiCode(colorBrightYellow) in grouped
+    check ansiCode(colorBrightCyan, cpBackground) in grouped
+    check "█" in stripAnsi(grouped)
 
     options.mode = bmStacked
     let stacked = plotBars(["A", "B"], values, options)
     check stacked.splitLines.len == 3 # two bars and one legend
     check "actual=4.00" in stacked
     check "forecast=2.00" in stacked
+
+    options.glyph = "#"
+    let customGlyphs = plotBars(["A", "B"], values, options)
+    check ansiCode(colorBrightCyan, cpBackground) notin customGlyphs
 
   test "supports fixed zero-containing ranges and integer data":
     var options = initBarGraphOptions()

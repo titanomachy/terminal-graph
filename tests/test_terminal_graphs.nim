@@ -109,6 +109,19 @@ suite "terminal_graphs rendering":
     check frame.splitLines.len == 10
     check 'x' in frame
 
+  test "covers colored full-block cell seams with matching backgrounds":
+    var plotter = initStaticGraph("Filled")
+    let fill = plotter.addSeries(
+      "values", style = psFill, marker = "▄")
+    plotter.setRange(0.0, 10.0)
+    plotter.push(fill, [5.0, 8.0])
+
+    let frame = plotter.render(width = 30, height = 10, useColor = true)
+
+    check "\e[36m" in frame
+    check "\e[46m" in frame
+    check "█" in stripAnsi(frame)
+
   test "can omit statistics and preserves off-screen history":
     var plotter = initPlotter("History", maxSamples = 100)
     let line = plotter.addSeries("values", marker = "+")

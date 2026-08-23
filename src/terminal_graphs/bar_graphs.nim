@@ -179,11 +179,24 @@ proc fillSegment(cells: var seq[BarCell]; startValue, endValue,
       cells[column] = BarCell(glyph: glyph, color: color)
 
 proc renderCells(cells: openArray[BarCell]; useColor: bool): string =
-  var activeColor = colorDefault
+  var
+    activeColor = colorDefault
+    activeSolidBlock = false
   for cell in cells:
-    if useColor and cell.color != activeColor:
-      result.add ansiCode(cell.color)
+    let solidBlock = useColor and cell.color != colorDefault and
+      cell.glyph == "█"
+    if useColor and (cell.color != activeColor or
+        solidBlock != activeSolidBlock):
+      if activeColor != colorDefault:
+        result.add termClear
+      if cell.color != colorDefault:
+        if solidBlock:
+          result.add ansiCode(cell.color)
+          result.add ansiCode(cell.color, cpBackground)
+        else:
+          result.add ansiCode(cell.color)
       activeColor = cell.color
+      activeSolidBlock = solidBlock
     result.add cell.glyph
   if useColor and activeColor != colorDefault:
     result.add termClear
@@ -212,7 +225,11 @@ proc addLegend(result: var string; options: BarGraphOptions;
       result.add "  "
     let color = options.seriesColors[index mod options.seriesColors.len]
     if options.useColor:
-      result.add ansiCode(color)
+      if options.glyph == "█" and color != colorDefault:
+        result.add ansiCode(color)
+        result.add ansiCode(color, cpBackground)
+      else:
+        result.add ansiCode(color)
     result.add options.glyph
     if options.useColor:
       result.add termClear

@@ -26,14 +26,14 @@ when isMainModule:
   graph.startLive()
   try:
     while true:
-      step += 0.12
+      step += 0.05
       graph.push(throughput,
         max(40.0 + sin(step) * 22.0 + rand(8.0) - 4.0, 0.0))
       graph.push(errors,
         max(8.0 + cos(step * 0.6) * 5.0 + rand(2.0), 0.0))
 
       graph.draw()
-      sleep(80)
+      sleep(33)
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard

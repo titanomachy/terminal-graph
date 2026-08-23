@@ -260,6 +260,11 @@ proc appendColor(buffer: var string; color: ForegroundColor;
   if useColor:
     buffer.add ansiForegroundColorCode(color)
 
+proc appendBackgroundColor(buffer: var string; color: ForegroundColor;
+                           useColor: bool) =
+  if useColor:
+    buffer.add ansiStyleCode(ord(color) + 10)
+
 proc appendReset(buffer: var string; useColor: bool) =
   if useColor:
     buffer.add ansiResetCode
@@ -360,14 +365,25 @@ proc render*(plotter: Plotter; width = 0; height = 0;
     result.add label & "┤"
     result.appendReset(useColor)
 
-    var activeColor = fgDefault
+    var
+      activeColor = fgDefault
+      activeBackground = fgDefault
     for column in 0 ..< plotWidth:
       let cellColor = colors[row][column]
       if cellColor != activeColor:
         result.appendReset(useColor)
+        activeBackground = fgDefault
         if cellColor != fgDefault:
           result.appendColor(cellColor, useColor)
         activeColor = cellColor
+      let cellBackground = if cellColor != fgDefault and
+          grid[row][column] == "█":
+        cellColor
+      else:
+        fgDefault
+      if cellBackground != activeBackground:
+        result.appendBackgroundColor(cellBackground, useColor)
+        activeBackground = cellBackground
       result.add grid[row][column]
     result.appendReset(useColor)
     result.add '\n'

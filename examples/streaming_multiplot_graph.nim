@@ -53,7 +53,7 @@ when isMainModule:
   setControlCHook(requestStop)
   try:
     while not stopRequested.load():
-      step += 0.15
+      step += 0.06
       throughput.push(throughputSeries,
         max(70.0 + sin(step) * 20.0 + rand(6.0) - 3.0, 0.0))
       latency.push(latencySeries,
@@ -65,7 +65,7 @@ when isMainModule:
         [renderThroughput, renderLatency], layout
       )
       dashboard.draw(frame)
-      sleep(80)
+      sleep(33)
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard

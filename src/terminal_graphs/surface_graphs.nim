@@ -128,6 +128,11 @@ proc paletteColor(palette: openArray[TerminalColor]; fraction: float64): Termina
 proc backgroundCode(color: TerminalColor): string =
   ansiCode(color, cpBackground)
 
+proc solidCellCode(color: TerminalColor): string =
+  ## Matching foreground and background colors cover font-cell seams around
+  ## a full-block glyph while preserving the glyph in copied/plain text.
+  ansiCode(color) & backgroundCode(color)
+
 proc glyphFor(fraction: float64; levelCount = SurfaceGlyphs.len): string =
   if fraction.isNaN:
     return " "
@@ -155,7 +160,7 @@ proc addScale(result: var string; options: SurfacePlotOptions;
       else:
         int(round(float64(index) * float64(options.palette.high) /
           float64(swatchCount - 1)))
-      result.add ansiCode(options.palette[sourceIndex]) & "█"
+      result.add solidCellCode(options.palette[sourceIndex]) & "█"
     result.add termClear
   else:
     for glyph in SurfaceGlyphs:
@@ -263,7 +268,7 @@ proc plotContourFloat(data: openArray[seq[float64]];
       if prepared.options.useColor:
         let color = paletteColor(prepared.options.palette, quantized)
         if color != activeColor:
-          result.add ansiCode(color)
+          result.add solidCellCode(color)
           activeColor = color
         result.add "█"
       else:

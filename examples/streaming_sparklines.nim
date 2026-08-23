@@ -25,7 +25,7 @@ when isMainModule:
   hideCursor()
   try:
     while true:
-      step += 0.18
+      step += 0.06
       cpuHistory.pushSample(
         clamp(52.0 + sin(step) * 28.0 + rand(8.0) - 4.0, 0.0, 100.0)
       )
@@ -45,7 +45,7 @@ when isMainModule:
       stdout.flushFile()
 
       hasPreviousFrame = true
-      sleep(100)
+      sleep(33)
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard

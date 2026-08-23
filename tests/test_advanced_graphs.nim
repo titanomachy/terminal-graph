@@ -226,6 +226,13 @@ suite "2D surface and contour plots":
     check "\e[48;5;" in surface
     check "▀" in surface
 
+    let contour = plotContour(@[
+      @[0.0, 1.0],
+      @[2.0, 3.0]
+    ], colored)
+    check "\e[48;5;" in contour
+    check "█" in stripAnsi(contour)
+
   test "resamples and shows a scale":
     var options = initSurfacePlotOptions()
     options.useColor = false

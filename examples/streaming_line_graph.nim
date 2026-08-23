@@ -24,11 +24,11 @@ when isMainModule:
   graph.startLive()
   try:
     while true:
-      step += 0.15
+      step += 0.06
       graph.push(0, 20.0 + sin(step) * 5.0 + rand(2.0))
       graph.push(1, 40.0 + cos(step * 0.7) * 12.0 + rand(5.0))
       graph.draw()
-      sleep(80)
+      sleep(33)
   except IOError:
     discard
   finally:
