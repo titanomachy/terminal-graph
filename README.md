@@ -16,9 +16,7 @@ effects and does not change terminal state.
 
 ## Platform support
 
-TerminalGraphs has been tested on Linux and Windows. **On Windows this library still has some serious issue which I am working on currently.** It should also work on
-macOS through its standard POSIX terminal and ANSI/VT support, but macOS has not
-yet been tested directly.
+TerminalGraphs has been tested on Linux and Windows. On Windows I tested with the Terminal app which comes with Windows, other terminals may or may not work. It should also work on macOS through its standard POSIX terminal and ANSI/VT support, but macOS has not yet been tested directly.
 
 ## Requirements
 
