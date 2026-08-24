@@ -16,6 +16,7 @@ All examples import sibling source modules and are compile-checked by
 `when isMainModule`; deterministic frame creation is covered separately by the
 test suites.
 
-Generate the API documentation locally with `nimble docs`, then open
-`htmldocs/index.html`. The generated `htmldocs/` directory is ignored by Git;
-the same command builds the documentation published by GitHub Pages.
+Generate the API documentation locally with `nimble docs`. Open
+`htmldocs/index.html`, or serve `htmldocs/` with a local HTTP server to enable
+the generated symbol search. The generated directory is ignored by Git; the
+same command builds the documentation published by GitHub Pages.

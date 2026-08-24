@@ -36,13 +36,5 @@ task examples, "Check that all examples compile":
   exec "nim check examples/streaming_line_graph.nim"
 
 task docs, "Generate API documentation":
-  exec "nim doc --out:htmldocs/index.html --path:src src/terminal_graph.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/bar_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/candle_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/line_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/live_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/multiplot_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/sparkline_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/static_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/surface_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/xy_graphs.nim"
+  exec "nim doc --project --index:on --outdir:htmldocs --path:src src/terminal_graph.nim"
+  exec "nim md2html --out:htmldocs/index.html docs/api-index.md"
