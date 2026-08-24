@@ -361,7 +361,9 @@ nimble docs       # generate htmldocs/ from public API comments
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development rules and
-[docs/public-api.md](docs/public-api.md) for the example coverage map.
+[docs/public-api.md](docs/public-api.md) for the example coverage map. The
+[generated API documentation](https://titanomachy.github.io/terminal-graph/)
+is published from the default branch.
 
 ## Attribution and license
 

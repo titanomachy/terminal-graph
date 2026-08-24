@@ -15,3 +15,7 @@ All examples import sibling source modules and are compile-checked by
 `nimble examples`. Streaming examples keep their terminal loops behind
 `when isMainModule`; deterministic frame creation is covered separately by the
 test suites.
+
+Generate the API documentation locally with `nimble docs`, then open
+`htmldocs/index.html`. The generated `htmldocs/` directory is ignored by Git;
+the same command builds the documentation published by GitHub Pages.

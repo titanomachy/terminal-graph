@@ -36,7 +36,7 @@ task examples, "Check that all examples compile":
   exec "nim check examples/streaming_line_graph.nim"
 
 task docs, "Generate API documentation":
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph.nim"
+  exec "nim doc --out:htmldocs/index.html --path:src src/terminal_graph.nim"
   exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/bar_graphs.nim"
   exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/candle_graphs.nim"
   exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/line_graphs.nim"
