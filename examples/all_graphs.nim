@@ -77,6 +77,29 @@ when isMainModule:
     requestOptions
   )
 
+  section("Static and live candle charts")
+  let
+    candleLabels = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    candlePrices = [
+      candle(101.0, 106.0, 99.0, 104.0),
+      candle(104.0, 108.0, 102.0, 103.0),
+      candle(103.0, 107.0, 101.0, 106.0),
+      candle(106.0, 110.0, 105.0, 108.0),
+      candle(108.0, 111.0, 103.0, 104.0)
+    ]
+  var candleOptions = initCandlePlotOptions()
+  candleOptions.width = 28
+  candleOptions.height = 10
+  candleOptions.caption = "Daily OHLC"
+  candleOptions.unit = "USD"
+  let staticCandles = plotCandles(
+    candleLabels, candlePrices, candleOptions)
+  var liveCandles = initLiveCandleGraph(
+    maxCandles = 20, options = candleOptions)
+  liveCandles.push(candleLabels, candlePrices)
+  liveCandles.updateLatest(candle(108.0, 113.0, 103.0, 111.0))
+  echo responsiveMultiplot([staticCandles, liveCandles.renderFrame()])
+
   section("Irregular XY line and scatter plot")
   let
     irregular = @[

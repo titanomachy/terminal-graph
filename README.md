@@ -1,8 +1,8 @@
 # TerminalGraph
 
-Pure-Nim terminal charts: connected lines, horizontal bars, irregular XY and
-scatter plots, static and live graphs, responsive multiplot dashboards, 2D
-surfaces, filled contours, and sparklines.
+Pure-Nim terminal charts: connected lines, horizontal bars, static and live
+OHLC candles, irregular XY and scatter plots, responsive multiplot dashboards,
+2D surfaces, filled contours, and sparklines.
 
 The package renders strings with Unicode and ANSI styling—there is no Python
 runtime or external plotting backend. Importing `terminal_graph` has no side
@@ -31,6 +31,7 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [API overview](#api-overview)
+  - [Candle charts](#candle-charts)
   - [Live lifecycle](#live-lifecycle)
 - [Examples](#examples)
   - [Live and streaming examples](#live-and-streaming-examples)
@@ -72,6 +73,12 @@ import terminal_graph
 
 echo sparkline([1, 4, 2, 8, 5])
 
+echo plotCandles([
+  candle(101, 106, 99, 104),
+  candle(104, 108, 102, 103),
+  candle(103, 109, 101, 108)
+])
+
 echo plot(
   [3, 4, 9, 6, 2, 4, 5, 8],
   graphWidth(40),
@@ -95,12 +102,13 @@ echo graph.render(width = 64, height = 14, useColor = false)
 | --- | --- | --- |
 | Connected lines | `plot`, `plotMany`, `AsciiGraphConfig` | Interpolation, labeled axes, formatters, legends, custom glyphs, gradients, thresholds, and NaN gaps |
 | Horizontal bars | `plotBars`, `BarGraphOptions` | Single-series, grouped, and stacked positive/negative bars around a shared zero axis |
+| OHLC candles | `plotCandles`, `CandlePlotOptions`, `LiveCandleGraph` | Ordered periods, fixed or automatic price ranges, streaming history, and in-progress candle updates |
 | XY and scatter | `plotXY`, `plotXYMany`, `plotScatter`, `plotScatterMany` | Explicit coordinates, fixed or automatic viewports, clipping, labels, markers, and legends |
 | Static graphs | `StaticGraph`, `initStaticGraph`, `render` | Bounded histories, line/fill series, statistics, automatic or fixed ranges, and deterministic dimensions |
 | Sparklines | `sparkline`, `SparklineOptions` | Shared or automatic ranges, gaps, custom ticks, and ANSI-256 palettes |
 | Surfaces and contours | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
 | Multiplot layouts | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
-| Live displays | `LiveGraph`, `LiveLineGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
+| Live displays | `LiveGraph`, `LiveLineGraph`, `LiveCandleGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
 | Terminal styling | Re-exported `terminal_style` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
 
 Line charts accept either composable option builders such as `graphWidth(40)`
@@ -111,6 +119,29 @@ also provide `useColor = false` for plain output.
 
 Focused imports such as `import terminal_graph/sparkline_graphs` are
 supported, but most applications should use `import terminal_graph`.
+
+### Candle charts
+
+`Candle` represents one OHLC interval. Static rendering and live ingestion
+validate its prices. Static charts require every candle to fit in the configured
+canvas; live charts retain a larger bounded history and render its newest
+width-limited window.
+
+```nim
+var options = initCandlePlotOptions()
+options.caption = "Live OHLC"
+options.unit = "USD"
+
+var candles = initLiveCandleGraph(maxCandles = 80, options = options)
+candles.push(candle(101, 106, 99, 104), "09:30")
+candles.updateLatest(candle(101, 108, 98, 107)) # label remains 09:30
+
+echo candles.renderFrame() # no cursor movement or terminal output
+```
+
+Automatic ranges use the visible candle lows and highs and do not force zero
+into the viewport. Use `setCandleRange` on static options or `setRange` on a
+live candle chart for a fixed price viewport.
 
 ### Live lifecycle
 
@@ -128,17 +159,29 @@ finally:
   graph.stopLive()
 ```
 
-`renderFrame()` returns a frame without writing to the terminal. Use
-`LiveDashboard` to redraw an arbitrary full-screen frame, including responsive
-multiplot output, without leaving resized frames in scrollback.
+`renderFrame()` returns a frame without writing to the terminal. This includes
+`LiveCandleGraph` frames, which can be placed beside other chart types with
+`multiplot`. Use `LiveDashboard` to redraw an arbitrary full-screen frame,
+including responsive multiplot output, without leaving resized frames in
+scrollback.
 
 On supported Windows consoles, live sessions enable virtual-terminal
 processing and restore the original console mode when they stop.
 
 ## Examples
 
-Run any example with `nim r examples/<name>.nim`. The four live examples run
-until Ctrl+C; their animations below show them in action.
+Run any example with `nim r examples/<name>.nim`. The five live examples run
+until Ctrl+C; selected animations appear below.
+
+<details>
+<summary><a href="examples/candle_graph.nim"><code>candle_graph.nim</code></a> — static ordered OHLC candles</summary>
+<p><a href="examples/images/candle_graph.png"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart"></a></p>
+</details>
+
+The focused [`streaming_candle_graph.nim`](examples/streaming_candle_graph.nim)
+example appends completed periods and repeatedly replaces the newest forming
+candle. Its `renderFrame()` output can also be placed beside another graph in a
+`LiveDashboard`.
 
 <details>
 <summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>

@@ -9,6 +9,11 @@ release.
 
 - Add asciigraph-style single- and multi-series line charts.
 - Add horizontal grouped and stacked bar charts.
+- Add static OHLC candlestick charts with ordered labels, automatic or fixed
+  price ranges, plain Unicode glyphs, and ANSI direction colors.
+- Add bounded `LiveCandleGraph` histories with atomic batch appends,
+  in-progress candle replacement, composable frame rendering, and the shared
+  live terminal lifecycle.
 - Add scatter plots and connected irregular XY charts with zero-crossing axes.
 - Add bounded static and streaming graph models.
 - Add compact and streaming sparklines with custom palettes and gaps.

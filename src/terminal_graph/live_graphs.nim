@@ -1,22 +1,22 @@
 ## Live terminal graph display helpers.
 ##
-## ``LiveGraph`` streams the marker/fill renderer, while ``LiveLineGraph``
-## streams the connected ASCII line renderer with its ANSI colors, gradients,
-## legends, and thresholds. ``LiveDashboard`` owns a full-screen lifecycle for
-## arbitrary composed frames, including responsive multiplots. Constructing or
-## importing these types never changes terminal state. Call ``startLive`` before
-## ``draw`` and ensure ``stopLive`` runs from a ``finally`` block.
+## ``LiveGraph`` streams the marker/fill renderer, ``LiveLineGraph`` streams the
+## connected ASCII line renderer, and ``LiveCandleGraph`` retains bounded OHLC
+## periods. ``LiveDashboard`` owns a full-screen lifecycle for arbitrary
+## composed frames, including responsive multiplots. Constructing or importing
+## these types never changes terminal state. Call ``startLive`` before ``draw``
+## and ensure ``stopLive`` runs from a ``finally`` block.
 ##
 ## Most applications should access this API through ``import terminal_graph``.
 
-import std/[deques, math, sequtils, strutils, terminal]
+import std/[deques, math, options, sequtils, strutils, terminal]
 
 when defined(windows):
   import std/winlean
 
-import ./[line_graphs, static_graphs]
+import ./[candle_graphs, line_graphs, static_graphs]
 
-export line_graphs, static_graphs
+export candle_graphs, line_graphs, static_graphs
 
 type LiveTerminalSession = object
   output: File
@@ -52,6 +52,15 @@ type LiveLineGraph* = object
   config*: AsciiGraphConfig
   sampleLimit*: int
   series: seq[Deque[float64]]
+  session: LiveTerminalSession
+  previousFrameLines: int
+
+type LiveCandleGraph* = object
+  ## A bounded OHLC history rendered repeatedly by ``plotCandles``.
+  options*: CandlePlotOptions
+  candleLimit*: int
+  candles: Deque[Candle]
+  labels: Deque[string]
   session: LiveTerminalSession
   previousFrameLines: int
 
@@ -390,6 +399,180 @@ proc draw*(graph: var LiveLineGraph) =
   graph.previousFrameLines = frame.splitLines().len
 
 proc stopLive*(graph: var LiveLineGraph) =
+  ## Stops streaming and restores terminal attributes and cursor visibility.
+  graph.session.stopSession()
+  graph.previousFrameLines = 0
+
+proc initLiveCandleGraph*(maxCandles = 80;
+                          options = initCandlePlotOptions();
+                          output: File = stdout): LiveCandleGraph =
+  ## Creates a bounded live candle chart without changing terminal state.
+  if maxCandles <= 0:
+    raise newException(ValueError,
+      "maxCandles must be greater than zero")
+  if output == nil:
+    raise newException(ValueError,
+      "live candle graph output cannot be nil")
+  LiveCandleGraph(
+    options: options,
+    candleLimit: maxCandles,
+    candles: initDeque[Candle](),
+    labels: initDeque[string](),
+    session: initLiveTerminalSession(output)
+  )
+
+proc validateLiveCandle(value: Candle) =
+  for price in [value.open, value.high, value.low, value.close]:
+    if price.classify in {fcNan, fcInf, fcNegInf}:
+      raise newException(ValueError, "candle prices must be finite")
+  if value.low > value.high or value.open < value.low or
+      value.open > value.high or value.close < value.low or
+      value.close > value.high:
+    raise newException(ValueError,
+      "candle prices must satisfy low <= open/close <= high")
+
+proc validateCandleLabel(label: string) =
+  if '\n' in label or '\r' in label:
+    raise newException(ValueError,
+      "candle labels cannot contain line breaks")
+
+proc appendValidated(graph: var LiveCandleGraph; value: Candle;
+                     label: string) =
+  graph.candles.addLast(value)
+  graph.labels.addLast(label)
+  while graph.candles.len > graph.candleLimit:
+    discard graph.candles.popFirst()
+    discard graph.labels.popFirst()
+
+proc push*(graph: var LiveCandleGraph; value: Candle) =
+  ## Appends one completed candle without a period label.
+  value.validateLiveCandle()
+  graph.appendValidated(value, "")
+
+proc push*(graph: var LiveCandleGraph; value: Candle; label: string) =
+  ## Appends one completed candle and its period label.
+  value.validateLiveCandle()
+  label.validateCandleLabel()
+  graph.appendValidated(value, label)
+
+proc push*(graph: var LiveCandleGraph;
+           values: openArray[Candle]) =
+  ## Atomically validates and appends several unlabelled candles.
+  for value in values:
+    value.validateLiveCandle()
+  for value in values:
+    graph.appendValidated(value, "")
+
+proc push*(graph: var LiveCandleGraph; labels: openArray[string];
+           values: openArray[Candle]) =
+  ## Atomically validates and appends labelled candles.
+  if labels.len != values.len:
+    raise newException(ValueError,
+      "candle label count must match the candle count")
+  for value in values:
+    value.validateLiveCandle()
+  for label in labels:
+    label.validateCandleLabel()
+  for index, value in values:
+    graph.appendValidated(value, labels[index])
+
+proc updateLatest*(graph: var LiveCandleGraph; value: Candle) =
+  ## Replaces the newest in-progress candle while retaining its label.
+  value.validateLiveCandle()
+  if graph.candles.len == 0:
+    raise newException(ValueError,
+      "cannot update an empty live candle graph")
+  discard graph.candles.popLast()
+  graph.candles.addLast(value)
+
+proc updateLatest*(graph: var LiveCandleGraph; value: Candle;
+                   label: string) =
+  ## Replaces the newest in-progress candle and its label.
+  value.validateLiveCandle()
+  label.validateCandleLabel()
+  if graph.candles.len == 0:
+    raise newException(ValueError,
+      "cannot update an empty live candle graph")
+  discard graph.candles.popLast()
+  discard graph.labels.popLast()
+  graph.candles.addLast(value)
+  graph.labels.addLast(label)
+
+proc candleCount*(graph: LiveCandleGraph): int =
+  ## Returns the number of retained candles.
+  graph.candles.len
+
+proc latestCandle*(graph: LiveCandleGraph): Option[Candle] =
+  ## Returns the newest retained candle, if any.
+  if graph.candles.len == 0:
+    none(Candle)
+  else:
+    some(graph.candles.peekLast())
+
+proc clear*(graph: var LiveCandleGraph) =
+  ## Clears all retained candles and labels.
+  graph.candles.clear()
+  graph.labels.clear()
+
+proc setRange*(graph: var LiveCandleGraph;
+               minimum, maximum: float64) =
+  ## Sets a fixed price range on the candle renderer.
+  graph.options.setCandleRange(minimum, maximum)
+
+proc clearRange*(graph: var LiveCandleGraph) =
+  ## Restores automatic price bounds on the candle renderer.
+  graph.options.clearCandleRange()
+
+proc renderFrame*(graph: LiveCandleGraph): string =
+  ## Renders the newest width-limited candle window without terminal I/O.
+  if graph.candles.len == 0:
+    return ""
+  var
+    retained = newSeqOfCap[Candle](graph.candles.len)
+    retainedLabels = newSeqOfCap[string](graph.labels.len)
+  for value in graph.candles:
+    retained.add value
+  for label in graph.labels:
+    retainedLabels.add label
+  let capacity = if graph.options.width > 0:
+    graph.options.width
+  else:
+    retained.len
+  let firstVisible = max(retained.len - capacity, 0)
+  plotCandles(
+    retainedLabels[firstVisible .. retainedLabels.high],
+    retained[firstVisible .. retained.high],
+    graph.options
+  )
+
+proc isActive*(graph: LiveCandleGraph): bool =
+  ## Returns whether the streaming candle display is active.
+  graph.session.active
+
+proc startLive*(graph: var LiveCandleGraph; clearScreen = true) =
+  ## Starts the streaming display and hides the terminal cursor.
+  if graph.session.active:
+    return
+  graph.session.startSession(
+    clearScreen = clearScreen,
+    alternateScreen = false
+  )
+  graph.previousFrameLines = 0
+
+proc draw*(graph: var LiveCandleGraph) =
+  ## Redraws the streaming candle chart while preserving content above it.
+  if not graph.session.active:
+    raise newException(ValueError,
+      "call startLive before drawing a live candle graph")
+  let frame = graph.renderFrame()
+  if frame.len == 0:
+    return
+  let update = frame.replaceLinesSequence(graph.previousFrameLines)
+  graph.session.output.write update
+  graph.session.output.flushFile()
+  graph.previousFrameLines = frame.splitLines().len
+
+proc stopLive*(graph: var LiveCandleGraph) =
   ## Stops streaming and restores terminal attributes and cursor visibility.
   graph.session.stopSession()
   graph.previousFrameLines = 0

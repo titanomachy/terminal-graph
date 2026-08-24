@@ -1,10 +1,10 @@
 ## TerminalGraph with one convenient import.
 ##
-## This façade re-exports bar, connected line, scatter/XY, multiplot, 2D
-## surface, static, live, sparkline, and terminal-styling APIs. Importing it has
-## no side effects; terminal state changes happen only through explicitly
-## called helpers. Compiling this file directly runs a small graph
-## demonstration because that code is guarded by ``when isMainModule``.
+## This façade re-exports bar, candle, connected line, scatter/XY, multiplot,
+## 2D surface, static, live, sparkline, and terminal-styling APIs. Importing it
+## has no side effects; terminal state changes happen only through explicitly
+## called helpers. Compiling this file directly runs a small graph demonstration
+## because that code is guarded by ``when isMainModule``.
 ##
 ## .. code-block:: nim
 ##
@@ -22,10 +22,10 @@
 ##   echo plotSurface(terrain)
 
 import terminal_style
-import terminal_graph/[bar_graphs, line_graphs, live_graphs,
+import terminal_graph/[bar_graphs, candle_graphs, line_graphs, live_graphs,
   multiplot_graphs, sparkline_graphs, static_graphs, surface_graphs, xy_graphs]
 
-export bar_graphs, line_graphs, live_graphs, multiplot_graphs,
+export bar_graphs, candle_graphs, line_graphs, live_graphs, multiplot_graphs,
   sparkline_graphs, static_graphs, surface_graphs, terminal_style, xy_graphs
 
 when isMainModule:
