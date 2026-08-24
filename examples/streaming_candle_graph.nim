@@ -13,7 +13,12 @@ when isMainModule:
   options.caption = "Live OHLC"
   options.unit = "USD"
 
-  var graph = initLiveCandleGraph(maxCandles = 80, options = options)
+  # Keep one blank column on either side of each candle so the streaming
+  # history remains visually distinct instead of becoming a solid ribbon.
+  var graph = initLiveCandleGraph(
+    maxCandles = options.width div 3,
+    options = options
+  )
   graph.push(
     ["09:30", "09:31", "09:32"],
     [
@@ -24,10 +29,11 @@ when isMainModule:
   )
 
   var
+    hour = 9
     minute = 33
     ticksInPeriod = 0
     current = candle(103.0, 103.0, 103.0, 103.0)
-  graph.push(current, &"09:{minute:02}")
+  graph.push(current, &"{hour:02}:{minute:02}")
 
   graph.startLive()
   try:
@@ -44,9 +50,12 @@ when isMainModule:
       if ticksInPeriod == 10:
         ticksInPeriod = 0
         inc minute
+        if minute == 60:
+          minute = 0
+          hour = (hour + 1) mod 24
         let nextOpen = current.close
         current = candle(nextOpen, nextOpen, nextOpen, nextOpen)
-        graph.push(current, &"09:{minute:02}")
+        graph.push(current, &"{hour:02}:{minute:02}")
   except IOError:
     discard
   finally:

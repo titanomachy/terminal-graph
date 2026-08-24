@@ -60,7 +60,7 @@ suite "static candle charts":
     check rendered.splitLines.len == options.height
     check rendered.count("█") == options.height
 
-  test "places labels without overlap and prioritizes endpoints":
+  test "separates labels and prioritizes endpoints":
     var options = plain
     options.width = 17
     options.height = 5
@@ -72,7 +72,7 @@ suite "static candle charts":
        candle(12, 14, 11, 13)],
       options
     )
-    check rendered.splitLines[^1] == "firstmiddle  last"
+    check rendered.splitLines[^1] == "first        last"
 
     options.width = 5
     let crowded = plotCandles(
@@ -81,6 +81,16 @@ suite "static candle charts":
       options
     )
     check crowded.splitLines[^1] == "first"
+
+    options.width = 24
+    let streaming = plotCandles(
+      ["09:30", "09:31", "09:32", "09:33", "09:34", "09:35"],
+      [candle(10, 12, 9, 11), candle(11, 13, 10, 12),
+       candle(12, 14, 11, 13), candle(13, 15, 12, 14),
+       candle(14, 16, 13, 15), candle(15, 17, 14, 16)],
+      options
+    ).splitLines[^1]
+    check streaming == "09:30  09:32       09:35"
 
   test "uses full-cell backgrounds for every direction color":
     var options = plain

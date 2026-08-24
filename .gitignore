@@ -8,11 +8,13 @@ htmldocs/
 /examples/advanced_graphs
 /examples/all_graphs
 /examples/bar_graph
+/examples/candle_graph
 /examples/line_graph
 /examples/live_graph
 /examples/multiplot_graph
 /examples/sparkline_graph
 /examples/static_graph
+/examples/streaming_candle_graph
 /examples/streaming_line_graph
 /examples/streaming_multiplot_graph
 /examples/streaming_sparklines
@@ -21,6 +23,7 @@ htmldocs/
 /tests/test_line_graphs
 /tests/test_advanced_graphs
 /tests/test_chart_types
+/tests/test_candle_graphs
 
 # Other
 RELEASING.md

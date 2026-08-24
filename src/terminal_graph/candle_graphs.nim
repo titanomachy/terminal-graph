@@ -263,14 +263,17 @@ proc labelLine(labels: openArray[string]; candleCount, width: int): string =
       continue
     let center = xCoordinate(index, candleCount, width)
     let start = clamp(center - labelWidth div 2, 0, width - labelWidth)
+    let
+      reservedStart = max(start - 1, 0)
+      reservedEnd = min(start + labelWidth + 1, width)
     var available = true
-    for column in start ..< start + labelWidth:
+    for column in reservedStart ..< reservedEnd:
       if occupied[column]:
         available = false
         break
     if not available:
       continue
-    for column in start ..< start + labelWidth:
+    for column in reservedStart ..< reservedEnd:
       occupied[column] = true
     placed.add PlacedLabel(start: start, width: labelWidth, text: clipped)
 
