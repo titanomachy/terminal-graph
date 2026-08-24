@@ -78,9 +78,9 @@ proc initCandlePlotOptions*(): CandlePlotOptions =
     axisColor: colorWhite,
     labelColor: colorDefault,
     wickGlyph: "│",
-    risingGlyph: "┃",
+    risingGlyph: "█",
     fallingGlyph: "█",
-    unchangedGlyph: "━",
+    unchangedGlyph: "█",
     minimum: none(float64),
     maximum: none(float64),
     lineEnding: "\n"

@@ -18,10 +18,10 @@ suite "static candle charts":
       candle(11, 12, 10, 11)
     ], plain)
     check rendered.splitLines.len == 8 # seven canvas rows and baseline
-    check "┃" in rendered
     check "█" in rendered
-    check "━" in rendered
     check "│" in rendered
+    check "┃" notin rendered
+    check "━" notin rendered
     check '\e' notin rendered
     for line in rendered.splitLines:
       check line.displayWidth == 15
@@ -34,7 +34,7 @@ suite "static candle charts":
     let rendered = plotCandles([
       candle(5, 5, 5, 5), candle(5, 5, 5, 5), candle(5, 5, 5, 5)
     ], options)
-    check rendered.splitLines[2] == "━   ━   ━"
+    check rendered.splitLines[2] == "█   █   █"
 
   test "formats axis values units captions and custom line endings":
     plain.caption = "Daily OHLC"
@@ -58,7 +58,7 @@ suite "static candle charts":
     options.showAxis = false
     let rendered = plotCandles([candle(5, 20, 0, 15)], options)
     check rendered.splitLines.len == options.height
-    check rendered.count("┃") == options.height
+    check rendered.count("█") == options.height
 
   test "places labels without overlap and prioritizes endpoints":
     var options = plain
@@ -82,7 +82,7 @@ suite "static candle charts":
     )
     check crowded.splitLines[^1] == "first"
 
-  test "emits direction colors and resets solid falling bodies":
+  test "uses full-cell backgrounds for every direction color":
     var options = plain
     options.useColor = true
     options.showAxis = false
@@ -93,8 +93,10 @@ suite "static candle charts":
     ], options)
     check ansiCode(colorBrightGreen) in rendered
     check ansiCode(colorBrightRed) in rendered
+    check ansiCode(colorBrightGreen, cpBackground) in rendered
     check ansiCode(colorBrightRed, cpBackground) in rendered
     check ansiCode(colorBrightYellow) in rendered
+    check ansiCode(colorBrightYellow, cpBackground) in rendered
     check rendered.endsWith(termClear) or termClear in rendered
 
   test "supports custom one-cell glyphs":

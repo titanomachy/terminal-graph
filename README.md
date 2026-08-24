@@ -42,7 +42,6 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
   - [Live displays](#live-displays)
   - [Terminal styling](#terminal-styling)
 - [Examples](#examples)
-  - [Live and streaming examples](#live-and-streaming-examples)
 - [Development and documentation](#development-and-documentation)
 - [Attribution and license](#attribution-and-license)
 
@@ -124,6 +123,8 @@ echo plot(
 )
 ```
 
+<p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output"></a></p>
+
 ### Horizontal bars
 
 Bar charts use a shared zero baseline, so positive and negative values remain
@@ -141,6 +142,8 @@ echo plotBars(
   options
 )
 ```
+
+<p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output"></a></p>
 
 ### OHLC candles
 
@@ -164,6 +167,8 @@ echo plotCandles(
 )
 ```
 
+<p><a href="examples/candle_graph.nim"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart output"></a></p>
+
 ### XY and scatter
 
 XY charts use explicit numeric coordinates rather than sample indices. A
@@ -183,6 +188,8 @@ echo plotScatter([
 ], options)
 ```
 
+<p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output"></a></p>
+
 ### Static graphs
 
 `StaticGraph` owns bounded series data and renders a complete deterministic
@@ -196,6 +203,8 @@ graph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
 echo graph.render(width = 64, height = 14, useColor = false)
 ```
 
+<p><a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Deterministic static graph output"></a></p>
+
 ### Sparklines
 
 Sparklines embed compact trends in ordinary text. Options provide shared
@@ -208,6 +217,8 @@ var shared = initSparklineOptions()
 shared.setSparklineRange(0.0, 100.0)
 echo "Load     ", sparkline([10, 25, 40, 75, 100], shared)
 ```
+
+<p><a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Compact sparkline examples"></a></p>
 
 ### Surfaces and contours
 
@@ -227,6 +238,8 @@ options.caption = "Service heatmap"
 echo plotContour(field, options)
 ```
 
+<p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output"></a></p>
+
 ### Multiplot layouts
 
 Multiplot combines already-rendered strings into ANSI- and Unicode-aware grids.
@@ -240,6 +253,8 @@ let
 
 echo multiplot([latency, load], columns = 2, horizontalGap = 4)
 ```
+
+<p><a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot dashboard output"></a></p>
 
 ### Live displays
 
@@ -266,85 +281,10 @@ Use `LiveDashboard` for resize-safe full-screen redraws of arbitrary frames,
 including responsive multiplot output. On supported Windows consoles, live
 sessions enable virtual-terminal processing and restore the original mode.
 
-### Terminal styling
-
-The façade re-exports `terminal_style`, including standard, indexed, RGB, and
-hex colors; text attributes; and ANSI-aware measuring, slicing, padding, and
-wrapping.
-
-```nim
-echo bold(brightCyan("Build succeeded"))
-echo onRgb(35, 42, 58, brightYellow(" warning "))
-echo "visible cells: ", displayWidth(red("A界BC"))
-```
-
-## Examples
-
-Run any example with `nim r examples/<name>.nim`. The five live examples run
-until Ctrl+C; selected animations appear below.
-
-<details>
-<summary><a href="examples/candle_graph.nim"><code>candle_graph.nim</code></a> — static ordered OHLC candles</summary>
-<p><a href="examples/images/candle_graph.png"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart"></a></p>
-</details>
-
 The focused [`streaming_candle_graph.nim`](examples/streaming_candle_graph.nim)
 example appends completed periods and repeatedly replaces the newest forming
 candle. Its `renderFrame()` output can also be placed beside another graph in a
 `LiveDashboard`.
-
-<details>
-<summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>
-<p><a href="examples/images/all_graphs.png"><img src="examples/images/all_graphs.png" alt="Complete output of the all graphs example"></a></p>
-</details>
-
-<table>
-  <tr>
-    <td width="50%">
-      <a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line graph example output"></a><br>
-      <strong><a href="examples/line_graph.nim"><code>line_graph.nim</code></a></strong><br>
-      Axes, multiple series, legends, gradients, and thresholds.
-    </td>
-    <td width="50%">
-      <a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar graph example output"></a><br>
-      <strong><a href="examples/bar_graph.nim"><code>bar_graph.nim</code></a></strong><br>
-      Grouped and stacked bars with positive and negative values.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter graph example output"></a><br>
-      <strong><a href="examples/xy_graph.nim"><code>xy_graph.nim</code></a></strong><br>
-      An irregular connected line and a scatter plot.
-    </td>
-    <td width="50%">
-      <a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Sparkline example output"></a><br>
-      <strong><a href="examples/sparkline_graph.nim"><code>sparkline_graph.nim</code></a></strong><br>
-      Compact graphs, gaps, shared scales, and a color gradient.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Static filled terminal graph example output"></a><br>
-      <strong><a href="examples/static_graph.nim"><code>static_graph.nim</code></a></strong><br>
-      A deterministic, plain-text frame for logs and reports.
-    </td>
-    <td width="50%">
-      <a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot terminal dashboard example output"></a><br>
-      <strong><a href="examples/multiplot_graph.nim"><code>multiplot_graph.nim</code></a></strong><br>
-      A responsive dashboard of independently rendered graph types.
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Two-dimensional surface and filled contour example output"></a><br>
-      <strong><a href="examples/advanced_graphs.nim"><code>advanced_graphs.nim</code></a></strong><br>
-      A high-resolution 2D surface and filled contours.
-    </td>
-  </tr>
-</table>
-
-### Live and streaming examples
 
 <table>
   <tr>
@@ -372,6 +312,28 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
     </td>
   </tr>
 </table>
+
+### Terminal styling
+
+The façade re-exports `terminal_style`, including standard, indexed, RGB, and
+hex colors; text attributes; and ANSI-aware measuring, slicing, padding, and
+wrapping.
+
+```nim
+echo bold(brightCyan("Build succeeded"))
+echo onRgb(35, 42, 58, brightYellow(" warning "))
+echo "visible cells: ", displayWidth(red("A界BC"))
+```
+
+## Examples
+
+Each screenshot above links to its focused runnable example. For a finite tour
+of every graph family, run `nim r examples/all_graphs.nim`:
+
+<details>
+<summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>
+<p><a href="examples/images/all_graphs.png"><img src="examples/images/all_graphs.png" alt="Complete output of the all graphs example"></a></p>
+</details>
 
 Compile-check every example at once with:
 
