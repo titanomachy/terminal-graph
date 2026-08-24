@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "titanomachy"
 description   = "Pure-Nim terminal bar, candle, line, XY, live, surface, and sparkline graphs"
 license       = "MIT"
