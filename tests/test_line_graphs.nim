@@ -1,6 +1,6 @@
 import std/[math, strformat, strutils, unittest]
 
-import terminal_graphs
+import terminal_graph
 
 suite "ASCII line graphs":
   test "plots one series with asciigraph-compatible connectors":

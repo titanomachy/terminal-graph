@@ -2,11 +2,11 @@
 ##
 ## This module contains the shared plot data model and renders complete graph
 ## frames without changing terminal state. Most applications should import the
-## ``terminal_graphs`` façade instead of this submodule directly.
+## ``terminal_graph`` façade instead of this submodule directly.
 ##
 ## .. code-block:: nim
 ##
-##   import terminal_graphs
+##   import terminal_graph
 ##
 ##   var graph = initStaticGraph("Request latency", unit = "ms")
 ##   let latency = graph.addSeries("p95")

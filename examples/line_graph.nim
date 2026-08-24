@@ -3,7 +3,7 @@
 when isMainModule:
   import std/strformat
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   let latency = [3.0, 4.0, 9.0, 6.0, 2.0, 4.0, 5.0, 8.0, 5.0,
     10.0, 2.0, 7.0, 2.0, 5.0, 6.0]

@@ -7,7 +7,7 @@
 ## importing these types never changes terminal state. Call ``startLive`` before
 ## ``draw`` and ensure ``stopLive`` runs from a ``finally`` block.
 ##
-## Most applications should access this API through ``import terminal_graphs``.
+## Most applications should access this API through ``import terminal_graph``.
 
 import std/[deques, math, sequtils, strutils, terminal]
 

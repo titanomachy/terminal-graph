@@ -3,7 +3,7 @@
 when isMainModule:
   import std/math
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   let
     responseTimes = [18, 21, 19, 26, 34, 31, 45, 38, 29, 24]

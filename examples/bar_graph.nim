@@ -1,7 +1,7 @@
 ## Grouped and stacked horizontal bars with a shared zero baseline.
 
 when isMainModule:
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   let
     regions = ["North", "South", "East", "West"]

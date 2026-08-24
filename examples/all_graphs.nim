@@ -1,4 +1,4 @@
-## A finite tour of every graph family exposed by ``terminal_graphs``.
+## A finite tour of every graph family exposed by ``terminal_graph``.
 ##
 ## The live graph examples render snapshots here instead of taking over the
 ## terminal, so this showcase always completes on its own.
@@ -6,7 +6,7 @@
 when isMainModule:
   import std/[math, terminal]
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   proc section(title: string) =
     echo "\n", bold(cyan("=== ", title, " ==="))
@@ -26,7 +26,7 @@ when isMainModule:
     layout.expandColumns = false
     multiplot(plots, layout)
 
-  section("Terminal styles")
+  section("Terminal styling")
   let heading = initTerminalStyle(
     foreground = hexColor("#78c8ff"),
     background = indexedColor(17),

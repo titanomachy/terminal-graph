@@ -1,6 +1,6 @@
 # Third-party notices
 
-The ASCII line renderer in `src/terminal_graphs/line_graphs.nim` is a Nim port
+The ASCII line renderer in `src/terminal_graph/line_graphs.nim` is a Nim port
 inspired by [`guptarohit/asciigraph`](https://github.com/guptarohit/asciigraph).
 The original project is distributed under the following license:
 
@@ -35,4 +35,3 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-

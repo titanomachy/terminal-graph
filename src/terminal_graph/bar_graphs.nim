@@ -3,7 +3,7 @@
 ## Bars may be rendered as independent grouped rows or as stacked segments.
 ## The value range always contains zero, giving positive and negative values a
 ## meaningful shared baseline. Most applications should import the
-## ``terminal_graphs`` façade instead of this submodule directly.
+## ``terminal_graph`` façade instead of this submodule directly.
 
 import std/[math, options, sequtils, strformat, strutils, unicode]
 

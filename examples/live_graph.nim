@@ -3,7 +3,7 @@
 when isMainModule:
   import std/[math, os, random, terminal]
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   randomize()
 

@@ -1,4 +1,4 @@
-## Terminal graphs with one convenient import.
+## TerminalGraph with one convenient import.
 ##
 ## This façade re-exports bar, connected line, scatter/XY, multiplot, 2D
 ## surface, static, live, sparkline, and terminal-styling APIs. Importing it has
@@ -8,7 +8,7 @@
 ##
 ## .. code-block:: nim
 ##
-##   import terminal_graphs
+##   import terminal_graph
 ##
 ##   echo plot([3, 4, 9, 6, 2, 4, 5, 8])
 ##   echo sparkline([1.0, 4.0, 2.0, 8.0])
@@ -21,12 +21,12 @@
 ##   let terrain = @[@[0.0, 0.5], @[0.75, 1.0]]
 ##   echo plotSurface(terrain)
 
-import terminal_styles
-import terminal_graphs/[bar_graphs, line_graphs, live_graphs,
+import terminal_style
+import terminal_graph/[bar_graphs, line_graphs, live_graphs,
   multiplot_graphs, sparkline_graphs, static_graphs, surface_graphs, xy_graphs]
 
 export bar_graphs, line_graphs, live_graphs, multiplot_graphs,
-  sparkline_graphs, static_graphs, surface_graphs, terminal_styles, xy_graphs
+  sparkline_graphs, static_graphs, surface_graphs, terminal_style, xy_graphs
 
 when isMainModule:
   echo "Sparkline example:"

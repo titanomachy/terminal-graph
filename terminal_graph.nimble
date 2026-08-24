@@ -10,10 +10,10 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 2.0.0"
-requires "terminal_styles >= 0.1.0"
+requires "terminal_style >= 0.1.1"
 
 task test, "Run the terminal graph test suite":
-  exec "nim r --path:src tests/test_terminal_graphs.nim"
+  exec "nim r --path:src tests/test_terminal_graph.nim"
   exec "nim r --path:src tests/test_line_graphs.nim"
   exec "nim r --path:src tests/test_advanced_graphs.nim"
   exec "nim r --path:src tests/test_chart_types.nim"
@@ -33,12 +33,12 @@ task examples, "Check that all examples compile":
   exec "nim check examples/streaming_line_graph.nim"
 
 task docs, "Generate API documentation":
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/bar_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/line_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/live_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/multiplot_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/sparkline_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/static_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/surface_graphs.nim"
-  exec "nim doc --outdir:htmldocs --path:src src/terminal_graphs/xy_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/bar_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/line_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/live_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/multiplot_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/sparkline_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/static_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/surface_graphs.nim"
+  exec "nim doc --outdir:htmldocs --path:src src/terminal_graph/xy_graphs.nim"

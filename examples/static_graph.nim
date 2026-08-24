@@ -4,7 +4,7 @@
 when isMainModule:
   import std/terminal
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   var graph = initStaticGraph("Weekly request volume", unit = "requests")
   let requests = graph.addSeries(

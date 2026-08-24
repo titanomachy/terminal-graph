@@ -1,8 +1,8 @@
 import std/[math, options, os, strutils, tempfiles, unittest]
 
-import terminal_graphs
+import terminal_graph
 
-suite "terminal_graphs data management":
+suite "terminal_graph data management":
   test "creates plotters and series":
     var plotter = initPlotter("CPU", unit = "%", maxSamples = 20)
 
@@ -68,7 +68,7 @@ suite "terminal_graphs data management":
     plotter.clear(series)
     check plotter.statistics(series).isNone
 
-suite "terminal_graphs ranges":
+suite "terminal_graph ranges":
   test "uses sensible automatic bounds":
     var emptyPlotter = initPlotter("empty")
     check emptyPlotter.valueRange == (minimum: 0.0, maximum: 1.0)
@@ -93,7 +93,7 @@ suite "terminal_graphs ranges":
     expect ValueError:
       plotter.setRange(Inf, 2.0)
 
-suite "terminal_graphs rendering":
+suite "terminal_graph rendering":
   test "renders deterministic plain-text frames":
     var plotter = initStaticGraph("Latency", unit = "ms")
     let line = plotter.addSeries("p95", marker = "x")
@@ -146,7 +146,7 @@ suite "terminal_graphs rendering":
     expect ValueError:
       discard plotter.render(height = MinimumRenderHeight - 1)
 
-suite "terminal_graphs sparklines":
+suite "terminal_graph sparklines":
   test "renders integer and floating-point sequences":
     check sparkline([0, 1, 2, 3, 4, 5, 6, 7]) == "▁▂▃▄▅▆▇█"
     check sparkline([2.5, 2.5, 2.5]) == "▅▅▅"
@@ -213,7 +213,7 @@ suite "terminal_graphs sparklines":
     expect ValueError:
       options.setSparklineRange(2.0, 1.0)
 
-suite "terminal_graphs live display":
+suite "terminal_graph live display":
   test "builds deterministic frames without changing terminal state":
     var graph = initLiveGraph(
       "Live requests",
@@ -235,7 +235,7 @@ suite "terminal_graphs live display":
   when defined(posix):
     test "full-screen dashboards redraw and restore terminal state":
       let (output, path) = createTempFile(
-        "terminal_graphs_dashboard_", ".txt")
+        "terminal_graph_dashboard_", ".txt")
       var outputOpen = true
       defer:
         if outputOpen:

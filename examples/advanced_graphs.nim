@@ -3,7 +3,7 @@
 when isMainModule:
   import std/math
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   var field: seq[seq[float64]]
   for row in 0 ..< 20:

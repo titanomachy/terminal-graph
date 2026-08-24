@@ -4,7 +4,7 @@ htmldocs/
 
 # Executables produced beside source entry points
 /app
-/terminal_graphs
+/terminal_graph
 /examples/advanced_graphs
 /examples/all_graphs
 /examples/bar_graph
@@ -17,7 +17,7 @@ htmldocs/
 /examples/streaming_multiplot_graph
 /examples/streaming_sparklines
 /examples/xy_graph
-/tests/test_terminal_graphs
+/tests/test_terminal_graph
 /tests/test_line_graphs
 /tests/test_advanced_graphs
 /tests/test_chart_types

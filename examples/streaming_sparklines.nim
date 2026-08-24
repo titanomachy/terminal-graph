@@ -4,7 +4,7 @@
 when isMainModule:
   import std/[atomics, math, os, random]
 
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   const HistoryLength = 36
 

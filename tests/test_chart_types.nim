@@ -1,6 +1,6 @@
 import std/[math, options, strutils, unittest]
 
-import terminal_graphs
+import terminal_graph
 
 suite "horizontal bar graphs":
   test "draws positive and negative values around zero":

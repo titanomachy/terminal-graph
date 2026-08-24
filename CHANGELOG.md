@@ -17,10 +17,11 @@ release.
   their assigned responsive-grid width.
 - Add a reusable `LiveDashboard` full-screen lifecycle with resize-safe redraws
   and POSIX alternate-screen support.
-- Re-export the shared `terminal_styles` API from the library façade.
+- Re-export the shared `terminal_style` API from the library façade.
 
 ### Changed
 
+- Adopt singular repository, package, import, and dependency naming.
 - Constrain responsive grids to the detected terminal width by default.
 - Reflow fixed and breakpoint column layouts when their requested column count
   no longer fits the available width.

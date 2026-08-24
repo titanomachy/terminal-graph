@@ -1,11 +1,11 @@
-# TerminalGraphs
+# TerminalGraph
 
 Pure-Nim terminal charts: connected lines, horizontal bars, irregular XY and
 scatter plots, static and live graphs, responsive multiplot dashboards, 2D
 surfaces, filled contours, and sparklines.
 
 The package renders strings with Unicode and ANSI styling—there is no Python
-runtime or external plotting backend. Importing `terminal_graphs` has no side
+runtime or external plotting backend. Importing `terminal_graph` has no side
 effects and does not change terminal state.
 
 <p align="center">
@@ -16,23 +16,23 @@ effects and does not change terminal state.
 
 ## Platform support
 
-TerminalGraphs has been tested on Linux and Windows. On Windows I tested with the Terminal app which comes with Windows, other terminals may or may not work. It should also work on macOS through its standard POSIX terminal and ANSI/VT support, but macOS has not yet been tested directly.
+TerminalGraph has been tested on Linux and Windows. On Windows I tested with the Terminal app which comes with Windows, other terminals may or may not work. It should also work on macOS through its standard POSIX terminal and ANSI/VT support, but macOS has not yet been tested directly.
 
 ## Requirements
 
 - Nim 2.0.0 or newer
-- [`terminal_styles`](https://github.com/titanomachy/terminal-styles) 0.1.0 or newer, installed from GitHub
-- No runtime dependencies beyond `terminal_styles`
+- [`terminal_style`](https://github.com/titanomachy/terminal-style) 0.1.1 or newer, installed from GitHub
+- No runtime dependencies beyond `terminal_style`
 
 Until the first release, install from a checkout:
 
 ```sh
-git clone https://github.com/titanomachy/terminal-graphs.git
-cd terminal-graphs
+git clone https://github.com/titanomachy/terminal-graph.git
+cd terminal-graph
 nimble install
 ```
 
-The repository also detects `../terminal_styles/src`, which is convenient when
+The repository also detects `../terminal-style/src`, which is convenient when
 both packages are sibling workspaces.
 
 ## Quick start
@@ -40,7 +40,7 @@ both packages are sibling workspaces.
 One façade import exposes every graph family and the shared styling API:
 
 ```nim
-import terminal_graphs
+import terminal_graph
 
 echo sparkline([1, 4, 2, 8, 5])
 
@@ -73,7 +73,7 @@ echo graph.render(width = 64, height = 14, useColor = false)
 | Surfaces and contours | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
 | Multiplot layouts | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
 | Live displays | `LiveGraph`, `LiveLineGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
-| Terminal styling | Re-exported `terminal_styles` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
+| Terminal styling | Re-exported `terminal_style` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
 
 Line charts accept either composable option builders such as `graphWidth(40)`
 or a reusable `AsciiGraphConfig`; the other graph families use their focused
@@ -81,8 +81,8 @@ options objects. Explicit dimensions make snapshots and logs deterministic,
 while zero dimensions detect the current terminal. Color-capable renderers
 also provide `useColor = false` for plain output.
 
-Focused imports such as `import terminal_graphs/sparkline_graphs` are
-supported, but most applications should use `import terminal_graphs`.
+Focused imports such as `import terminal_graph/sparkline_graphs` are
+supported, but most applications should use `import terminal_graph`.
 
 ### Live lifecycle
 
@@ -219,4 +219,4 @@ and visualization ideas were inspired by
 [`sindresorhus/sparkly`](https://github.com/sindresorhus/sparkly). See
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the required notice.
 
-`terminal_graphs` is released under the [MIT License](LICENSE).
+`terminal_graph` is released under the [MIT License](LICENSE).

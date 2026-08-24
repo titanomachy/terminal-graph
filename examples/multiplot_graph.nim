@@ -2,7 +2,7 @@
 ## Widen or narrow the terminal to let the grid select a different column count.
 
 when isMainModule:
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   let latency = plot(
     [18.0, 24.0, 21.0, 29.0, 35.0, 31.0, 42.0, 38.0],

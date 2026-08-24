@@ -1,7 +1,7 @@
 ## Scatter and irregularly spaced connected XY plots.
 
 when isMainModule:
-  import ../src/terminal_graphs
+  import ../src/terminal_graph
 
   let irregular = @[
     xyPoint(-5.0, -1.0),

@@ -7,14 +7,14 @@
 ## captions, legends, custom characters and axis formatters, X-axis labels,
 ## standard, indexed, and RGB colors, value gradients, threshold colors, NaN
 ## gaps, and custom
-## line endings. Most applications should import the ``terminal_graphs``
+## line endings. Most applications should import the ``terminal_graph``
 ## façade rather than this submodule directly.
 
 import std/[math, options, sequtils, strformat, strutils, unicode]
 
-import terminal_styles
+import terminal_style
 
-export terminal_styles
+export terminal_style
 
 type
   LineCharSet* = object

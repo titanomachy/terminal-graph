@@ -27,9 +27,9 @@
 
 import std/[sequtils, strutils, terminal]
 
-import terminal_styles
+import terminal_style
 
-export terminal_styles
+export terminal_style
 
 type
   MultiplotColumnKind* = enum

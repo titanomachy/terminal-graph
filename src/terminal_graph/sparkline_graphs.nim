@@ -3,7 +3,7 @@
 ## Sparklines support automatic or explicit ranges, NaN gaps, custom glyphs,
 ## standard, indexed, or RGB palettes and configurable handling for constant
 ## nonzero data.
-## Most applications should access this API through ``import terminal_graphs``.
+## Most applications should access this API through ``import terminal_graph``.
 
 import std/[math, options, unicode]
 

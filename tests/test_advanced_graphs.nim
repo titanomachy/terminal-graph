@@ -1,6 +1,6 @@
 import std/[math, os, sequtils, strutils, tempfiles, unittest]
 
-import terminal_graphs
+import terminal_graph
 
 suite "multiplot layouts":
   test "aligns plots side by side and in grids":
@@ -301,7 +301,7 @@ suite "colored live line graphs":
   when defined(posix):
     test "repaints before erasing stale rows":
       let (output, path) = createTempFile(
-        "terminal_graphs_live_line_", ".txt")
+        "terminal_graph_live_line_", ".txt")
       var outputOpen = true
       defer:
         if outputOpen:
@@ -338,6 +338,6 @@ suite "colored live line graphs":
       check emitted.endsWith("\e[0m\e[?25h")
 
 suite "terminal styling façade":
-  test "exports styling helpers from terminal_graphs":
+  test "exports styling helpers from terminal_graph":
     check red("alert").startsWith(termRed)
     check red("alert").endsWith(termClear)
