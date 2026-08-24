@@ -9,8 +9,8 @@ runtime or external plotting backend. Importing `terminal_graph` has no side
 effects and does not change terminal state.
 
 <p align="center">
-  <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" width="45%"></a>
-  <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" width="51.45%"></a>
+  <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="260"></a>
+  <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" height="260"></a>
 </p>
 <p align="center"><a href="#examples">More examples</a></p>
 
