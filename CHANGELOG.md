@@ -3,7 +3,7 @@
 This project follows Semantic Versioning. It has not yet made its first public
 release.
 
-## [0.1.0] - Unreleased
+[0.1.0] - 2026-08-24
 
 ### Added
 

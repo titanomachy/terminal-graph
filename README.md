@@ -24,16 +24,44 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
 - [`terminal_style`](https://github.com/titanomachy/terminal-style) 0.1.1 or newer, installed from GitHub
 - No runtime dependencies beyond `terminal_style`
 
-Until the first release, install from a checkout:
+## Contents
+
+- [Platform support](#platform-support)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [API overview](#api-overview)
+  - [Live lifecycle](#live-lifecycle)
+- [Examples](#examples)
+  - [Live and streaming examples](#live-and-streaming-examples)
+- [Development and documentation](#development-and-documentation)
+- [Attribution and license](#attribution-and-license)
+
+## Installation
+
+Install the current version with Nimble:
 
 ```sh
-git clone https://github.com/titanomachy/terminal-graph.git
-cd terminal-graph
-nimble install
+nimble install terminal_style
+nimble install terminal_graph
 ```
 
-The repository also detects `../terminal-style/src`, which is convenient when
-both packages are sibling workspaces.
+Or if you prefer directly via Github:
+```sh
+nimble install https://github.com/titanomachy/terminal-style
+nimble install https://github.com/titanomachy/terminal-graph
+```
+
+Then import the complete core API:
+
+```nim
+import terminal_graph
+```
+
+The main module also re-exports `terminal_style`, so colors, reusable styles,
+ANSI stripping, and display-width helpers do not need a second import. Typed
+objects and CSV/JSON parsing use opt-in modules to keep macros and parsers out
+of the core facade.
 
 ## Quick start
 
