@@ -31,8 +31,16 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [API overview](#api-overview)
-  - [Candle charts](#candle-charts)
-  - [Live lifecycle](#live-lifecycle)
+  - [Connected lines](#connected-lines)
+  - [Horizontal bars](#horizontal-bars)
+  - [OHLC candles](#ohlc-candles)
+  - [XY and scatter](#xy-and-scatter)
+  - [Static graphs](#static-graphs)
+  - [Sparklines](#sparklines)
+  - [Surfaces and contours](#surfaces-and-contours)
+  - [Multiplot layouts](#multiplot-layouts)
+  - [Live displays](#live-displays)
+  - [Terminal styling](#terminal-styling)
 - [Examples](#examples)
   - [Live and streaming examples](#live-and-streaming-examples)
 - [Development and documentation](#development-and-documentation)
@@ -66,18 +74,10 @@ of the core facade.
 
 ## Quick start
 
-One façade import exposes every graph family and the shared styling API:
+One façade import is enough to render a chart:
 
 ```nim
 import terminal_graph
-
-echo sparkline([1, 4, 2, 8, 5])
-
-echo plotCandles([
-  candle(101, 106, 99, 104),
-  candle(104, 108, 102, 103),
-  candle(103, 109, 101, 108)
-])
 
 echo plot(
   [3, 4, 9, 6, 2, 4, 5, 8],
@@ -86,87 +86,197 @@ echo plot(
   graphCaption("Request latency"),
   graphSeriesColors([colorBrightCyan])
 )
-
-var graph = initStaticGraph("Weekly requests", unit = "requests")
-let requests = graph.addSeries(
-  "requests", style = psFill, marker = "▄"
-)
-graph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
-
-echo graph.render(width = 64, height = 14, useColor = false)
 ```
 
 ## API overview
 
 | Graph family | Main API | Highlights |
 | --- | --- | --- |
-| Connected lines | `plot`, `plotMany`, `AsciiGraphConfig` | Interpolation, labeled axes, formatters, legends, custom glyphs, gradients, thresholds, and NaN gaps |
-| Horizontal bars | `plotBars`, `BarGraphOptions` | Single-series, grouped, and stacked positive/negative bars around a shared zero axis |
-| OHLC candles | `plotCandles`, `CandlePlotOptions`, `LiveCandleGraph` | Ordered periods, fixed or automatic price ranges, streaming history, and in-progress candle updates |
-| XY and scatter | `plotXY`, `plotXYMany`, `plotScatter`, `plotScatterMany` | Explicit coordinates, fixed or automatic viewports, clipping, labels, markers, and legends |
-| Static graphs | `StaticGraph`, `initStaticGraph`, `render` | Bounded histories, line/fill series, statistics, automatic or fixed ranges, and deterministic dimensions |
-| Sparklines | `sparkline`, `SparklineOptions` | Shared or automatic ranges, gaps, custom ticks, and ANSI-256 palettes |
-| Surfaces and contours | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
-| Multiplot layouts | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
-| Live displays | `LiveGraph`, `LiveLineGraph`, `LiveCandleGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
-| Terminal styling | Re-exported `terminal_style` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
+| [Connected lines](#connected-lines) | `plot`, `plotMany`, `AsciiGraphConfig` | Interpolation, labeled axes, formatters, legends, custom glyphs, gradients, thresholds, and NaN gaps |
+| [Horizontal bars](#horizontal-bars) | `plotBars`, `BarGraphOptions` | Single-series, grouped, and stacked positive/negative bars around a shared zero axis |
+| [OHLC candles](#ohlc-candles) | `plotCandles`, `CandlePlotOptions`, `LiveCandleGraph` | Ordered periods, fixed or automatic price ranges, streaming history, and in-progress candle updates |
+| [XY and scatter](#xy-and-scatter) | `plotXY`, `plotXYMany`, `plotScatter`, `plotScatterMany` | Explicit coordinates, fixed or automatic viewports, clipping, labels, markers, and legends |
+| [Static graphs](#static-graphs) | `StaticGraph`, `initStaticGraph`, `render` | Bounded histories, line/fill series, statistics, automatic or fixed ranges, and deterministic dimensions |
+| [Sparklines](#sparklines) | `sparkline`, `SparklineOptions` | Shared or automatic ranges, gaps, custom ticks, and ANSI-256 palettes |
+| [Surfaces and contours](#surfaces-and-contours) | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
+| [Multiplot layouts](#multiplot-layouts) | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
+| [Live displays](#live-displays) | `LiveGraph`, `LiveLineGraph`, `LiveCandleGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
+| [Terminal styling](#terminal-styling) | Re-exported `terminal_style` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
 
-Line charts accept either composable option builders such as `graphWidth(40)`
-or a reusable `AsciiGraphConfig`; the other graph families use their focused
-options objects. Explicit dimensions make snapshots and logs deterministic,
-while zero dimensions detect the current terminal. Color-capable renderers
-also provide `useColor = false` for plain output.
+Most applications should import `terminal_graph`. Focused imports such as
+`terminal_graph/sparkline_graphs` are also supported. Rendering is string-based
+and side-effect free; explicit dimensions and options make snapshots
+deterministic.
 
-Focused imports such as `import terminal_graph/sparkline_graphs` are
-supported, but most applications should use `import terminal_graph`.
+### Connected lines
 
-### Candle charts
+`plot` renders one sample-indexed series; `plotMany` places several series on
+the same axes. Option builders configure dimensions, labels, formatters,
+colors, gradients, thresholds, and X-axis ticks.
 
-`Candle` represents one OHLC interval. Static rendering and live ingestion
-validate its prices. Static charts require every candle to fit in the configured
-canvas; live charts retain a larger bounded history and render its newest
-width-limited window.
+```nim
+echo plot(
+  [18.0, 21.0, 19.0, 26.0, 34.0, 31.0],
+  graphWidth(40),
+  graphHeight(8),
+  graphCaption("Request latency"),
+  graphSeriesColors([colorBrightCyan])
+)
+```
+
+### Horizontal bars
+
+Bar charts use a shared zero baseline, so positive and negative values remain
+directly comparable. Multiple series may be grouped or stacked.
+
+```nim
+var options = initBarGraphOptions()
+options.caption = "Regional change"
+options.unit = "%"
+options.seriesLegends = @["current", "previous"]
+
+echo plotBars(
+  ["North", "South"],
+  @[@[18.0, -7.0], @[12.0, 5.0]],
+  options
+)
+```
+
+### OHLC candles
+
+`Candle` represents one ordered OHLC interval. Automatic ranges use visible
+lows and highs without forcing zero into the viewport; explicit ranges clip
+the candle geometry. Static rendering requires every candle to fit the canvas.
+
+```nim
+var options = initCandlePlotOptions()
+options.caption = "Daily OHLC"
+options.unit = "USD"
+
+echo plotCandles(
+  ["Mon", "Tue", "Wed"],
+  [
+    candle(101, 106, 99, 104),
+    candle(104, 108, 102, 103),
+    candle(103, 109, 101, 108)
+  ],
+  options
+)
+```
+
+### XY and scatter
+
+XY charts use explicit numeric coordinates rather than sample indices. A
+series can be connected in its supplied order or rendered as independent
+scatter points, with fixed viewports and clipping when needed.
+
+```nim
+var options = initXYPlotOptions()
+options.caption = "Latency samples"
+options.xLabel = "time"
+options.yLabel = "ms"
+
+echo plotScatter([
+  xyPoint(-2.0, 3.0),
+  xyPoint(0.0, 5.0),
+  xyPoint(3.0, 4.0)
+], options)
+```
+
+### Static graphs
+
+`StaticGraph` owns bounded series data and renders a complete deterministic
+frame with optional statistics. Series may use markers or filled columns.
+
+```nim
+var graph = initStaticGraph("Weekly requests", unit = "requests")
+let requests = graph.addSeries("requests", style = psFill, marker = "▄")
+graph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
+
+echo graph.render(width = 64, height = 14, useColor = false)
+```
+
+### Sparklines
+
+Sparklines embed compact trends in ordinary text. Options provide shared
+ranges, custom tick glyphs, gap handling, and ANSI-256 palettes.
+
+```nim
+echo "Latency  ", sparkline([18, 21, 19, 26, 34, 31, 45]), " ms"
+
+var shared = initSparklineOptions()
+shared.setSparklineRange(0.0, 100.0)
+echo "Load     ", sparkline([10, 25, 40, 75, 100], shared)
+```
+
+### Surfaces and contours
+
+Surface plots pack two sampled rows into each terminal row. Contours render the
+same matrix as discrete filled bands; both support resampling, palettes, and
+fixed value ranges.
+
+```nim
+let field = @[
+  @[0.0, 0.5, 1.0],
+  @[0.5, 1.0, 0.5],
+  @[1.0, 0.5, 0.0]
+]
+
+var options = initSurfacePlotOptions()
+options.caption = "Service heatmap"
+echo plotContour(field, options)
+```
+
+### Multiplot layouts
+
+Multiplot combines already-rendered strings into ANSI- and Unicode-aware grids.
+Responsive render callbacks receive their assigned width before rendering, so
+dashboards can reflow without wrapping individual charts.
+
+```nim
+let
+  latency = plot([18, 24, 21, 29], graphWidth(24), graphHeight(6))
+  load = plot([40, 55, 48, 63], graphWidth(24), graphHeight(6))
+
+echo multiplot([latency, load], columns = 2, horizontalGap = 4)
+```
+
+### Live displays
+
+`LiveGraph`, `LiveLineGraph`, and `LiveCandleGraph` retain bounded streaming
+state. Their `renderFrame()` methods are side-effect free; `startLive`, `draw`,
+and `stopLive` provide in-place terminal output. Always restore terminal state
+in a `finally` block.
 
 ```nim
 var options = initCandlePlotOptions()
 options.caption = "Live OHLC"
-options.unit = "USD"
-
-var candles = initLiveCandleGraph(maxCandles = 80, options = options)
-candles.push(candle(101, 106, 99, 104), "09:30")
-candles.updateLatest(candle(101, 108, 98, 107)) # label remains 09:30
-
-echo candles.renderFrame() # no cursor movement or terminal output
-```
-
-Automatic ranges use the visible candle lows and highs and do not force zero
-into the viewport. Use `setCandleRange` on static options or `setRange` on a
-live candle chart for a fixed price viewport.
-
-### Live lifecycle
-
-Always restore terminal state in a `finally` block:
-
-```nim
-var graph = initLiveGraph("Requests", unit = "req/s")
-let requests = graph.addSeries("requests", style = psFill, marker = "▄")
+var graph = initLiveCandleGraph(maxCandles = 80, options = options)
+graph.push(candle(101, 106, 99, 104), "09:30")
 
 graph.startLive()
 try:
-  graph.push(requests, 42.0)
+  graph.updateLatest(candle(101, 108, 98, 107))
   graph.draw()
 finally:
   graph.stopLive()
 ```
 
-`renderFrame()` returns a frame without writing to the terminal. This includes
-`LiveCandleGraph` frames, which can be placed beside other chart types with
-`multiplot`. Use `LiveDashboard` to redraw an arbitrary full-screen frame,
-including responsive multiplot output, without leaving resized frames in
-scrollback.
+Use `LiveDashboard` for resize-safe full-screen redraws of arbitrary frames,
+including responsive multiplot output. On supported Windows consoles, live
+sessions enable virtual-terminal processing and restore the original mode.
 
-On supported Windows consoles, live sessions enable virtual-terminal
-processing and restore the original console mode when they stop.
+### Terminal styling
+
+The façade re-exports `terminal_style`, including standard, indexed, RGB, and
+hex colors; text attributes; and ANSI-aware measuring, slicing, padding, and
+wrapping.
+
+```nim
+echo bold(brightCyan("Build succeeded"))
+echo onRgb(35, 42, 58, brightYellow(" warning "))
+echo "visible cells: ", displayWidth(red("A界BC"))
+```
 
 ## Examples
 
