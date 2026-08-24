@@ -9,8 +9,9 @@ runtime or external plotting backend. Importing `terminal_graph` has no side
 effects and does not change terminal state.
 
 <p align="center">
-  <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="220"></a>
-  <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" height="220"></a>
+  <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="150"></a>
+  <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" height="150"></a>
+  <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart" height="150"></a>
 </p>
 <p align="center"><a href="#examples">More examples</a></p>
 
@@ -40,6 +41,7 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
   - [Surfaces and contours](#surfaces-and-contours)
   - [Multiplot layouts](#multiplot-layouts)
   - [Live displays](#live-displays)
+    - [Live and streaming examples](#live-and-streaming-examples)
   - [Terminal styling](#terminal-styling)
 - [Examples](#examples)
 - [Development and documentation](#development-and-documentation)
@@ -286,26 +288,35 @@ example appends completed periods and repeatedly replaces the newest forming
 candle. Its `renderFrame()` output can also be placed beside another graph in a
 `LiveDashboard`.
 
+#### Live and streaming examples
+
 <table>
   <tr>
+    <td width="50%">
+      <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart"></a><br>
+      <strong><a href="examples/streaming_candle_graph.nim"><code>streaming_candle_graph.nim</code></a></strong><br>
+      Completed periods with a repeatedly updated in-progress candle.
+    </td>
     <td width="50%">
       <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="240"></a><br>
       <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong><br>
       Generated service metrics redrawn fluidly as a full terminal frame.
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph" height="240"></a><br>
       <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong><br>
       Two connected series in bounded streaming windows.
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <a href="examples/streaming_multiplot_graph.nim"><img src="examples/images/streaming_multiplot_graph2.gif" alt="Animated responsive streaming multiplot dashboard"></a><br>
       <strong><a href="examples/streaming_multiplot_graph.nim"><code>streaming_multiplot_graph.nim</code></a></strong><br>
       Two live graphs in a resize-aware full-screen dashboard.
     </td>
-    <td width="50%">
+  </tr>
+  <tr>
+    <td colspan="2">
       <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines"></a><br>
       <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong><br>
       A compact CPU and memory dashboard from reusable sparklines.
