@@ -1,4 +1,5 @@
 ## Scatter and irregularly spaced connected XY plots.
+# Run with: nim r --path:src examples/xy_graph.nim
 
 when isMainModule:
   import ../src/terminal_graph

@@ -1,4 +1,5 @@
 ## Pure-Nim multiplot, surface, and filled-contour examples.
+# Run with: nim r --path:src examples/advanced_graphs.nim
 
 when isMainModule:
   import std/math

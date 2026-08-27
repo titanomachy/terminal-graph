@@ -1,5 +1,6 @@
 ## Arrange independently rendered graph types in an auto-fitting dashboard.
 ## Widen or narrow the terminal to let the grid select a different column count.
+# Run with: nim r --path:src examples/multiplot_graph.nim
 
 when isMainModule:
   import ../src/terminal_graph

@@ -1,4 +1,5 @@
 ## Feature tour for the asciigraph-style line renderer.
+# Run with: nim r --path:src examples/line_graph.nim
 
 when isMainModule:
   import std/strformat

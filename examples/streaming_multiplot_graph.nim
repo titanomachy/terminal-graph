@@ -1,5 +1,6 @@
 ## Continuously update two independent line graphs as one multiplot dashboard.
 ## Stop it with Ctrl+C.
+# Run with: nim r --path:src examples/streaming_multiplot_graph.nim
 
 when isMainModule:
   import std/[atomics, math, os, random, terminal]

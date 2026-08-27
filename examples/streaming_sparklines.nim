@@ -1,5 +1,6 @@
 ## A compact streaming dashboard made from reusable sparkline renderings.
 ## Stop it with Ctrl+C.
+# Run with: nim r --path:src examples/streaming_sparklines.nim
 
 when isMainModule:
   import std/[atomics, math, os, random]

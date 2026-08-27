@@ -1,5 +1,6 @@
 ## Render a deterministic graph once. This is suitable for reports, logs, and
 ## a quick first integration test.
+# Run with: nim r --path:src examples/static_graph.nim
 
 when isMainModule:
   import std/terminal

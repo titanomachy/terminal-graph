@@ -1,4 +1,5 @@
 ## Static OHLC candlesticks with ordered period labels.
+# Run with: nim r --path:src examples/candle_graph.nim
 
 when isMainModule:
   import ../src/terminal_graph

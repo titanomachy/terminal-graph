@@ -1,4 +1,5 @@
 ## Stream completed candles and update the newest forming candle. Stop with Ctrl+C.
+# Run with: nim r --path:src examples/streaming_candle_graph.nim
 
 when isMainModule:
   import std/[os, random, strformat]

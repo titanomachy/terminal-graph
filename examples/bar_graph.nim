@@ -1,4 +1,5 @@
 ## Grouped and stacked horizontal bars with a shared zero baseline.
+# Run with: nim r --path:src examples/bar_graph.nim
 
 when isMainModule:
   import ../src/terminal_graph

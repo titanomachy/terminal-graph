@@ -1,4 +1,5 @@
 ## Compact sparklines embedded in ordinary terminal output.
+# Run with: nim r --path:src examples/sparkline_graph.nim
 
 when isMainModule:
   import std/math

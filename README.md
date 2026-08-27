@@ -127,6 +127,10 @@ echo plot(
 
 <p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output" width="360"></a></p>
 
+```sh
+nim r --path:src examples/line_graph.nim
+```
+
 ### Horizontal bars
 
 Bar charts use a shared zero baseline, so positive and negative values remain
@@ -146,6 +150,10 @@ echo plotBars(
 ```
 
 <p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output" width="620"></a></p>
+
+```sh
+nim r --path:src examples/bar_graph.nim
+```
 
 ### OHLC candles
 
@@ -171,6 +179,10 @@ echo plotCandles(
 
 <p><a href="examples/candle_graph.nim"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart output"></a></p>
 
+```sh
+nim r --path:src examples/candle_graph.nim
+```
+
 ### XY and scatter
 
 XY charts use explicit numeric coordinates rather than sample indices. A
@@ -192,6 +204,10 @@ echo plotScatter([
 
 <p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output" width="620"></a></p>
 
+```sh
+nim r --path:src examples/xy_graph.nim
+```
+
 ### Static graphs
 
 `StaticGraph` owns bounded series data and renders a complete deterministic
@@ -207,6 +223,10 @@ echo graph.render(width = 64, height = 14, useColor = false)
 
 <p><a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Deterministic static graph output"></a></p>
 
+```sh
+nim r --path:src examples/static_graph.nim
+```
+
 ### Sparklines
 
 Sparklines embed compact trends in ordinary text. Options provide shared
@@ -221,6 +241,10 @@ echo "Load     ", sparkline([10, 25, 40, 75, 100], shared)
 ```
 
 <p><a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Compact sparkline examples"></a></p>
+
+```sh
+nim r --path:src examples/sparkline_graph.nim
+```
 
 ### Surfaces and contours
 
@@ -242,6 +266,10 @@ echo plotContour(field, options)
 
 <p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output" width="620"></a></p>
 
+```sh
+nim r --path:src examples/advanced_graphs.nim
+```
+
 ### Multiplot layouts
 
 Multiplot combines already-rendered strings into ANSI- and Unicode-aware grids.
@@ -257,6 +285,10 @@ echo multiplot([latency, load], columns = 2, horizontalGap = 4)
 ```
 
 <p><a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot dashboard output"></a></p>
+
+```sh
+nim r --path:src examples/multiplot_graph.nim
+```
 
 ### Live displays
 
@@ -295,11 +327,13 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
     <td width="50%">
       <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart"></a><br>
       <strong><a href="examples/streaming_candle_graph.nim"><code>streaming_candle_graph.nim</code></a></strong><br>
+      <code>nim r --path:src examples/streaming_candle_graph.nim</code><br>
       Completed periods with a repeatedly updated in-progress candle.
     </td>
     <td width="50%">
       <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="240"></a><br>
       <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong><br>
+      <code>nim r --path:src examples/live_graph.nim</code><br>
       Generated service metrics redrawn fluidly as a full terminal frame.
     </td>
   </tr>
@@ -307,11 +341,13 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
     <td width="50%">
       <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph" height="240"></a><br>
       <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong><br>
+      <code>nim r --path:src examples/streaming_line_graph.nim</code><br>
       Two connected series in bounded streaming windows.
     </td>
     <td width="50%">
       <a href="examples/streaming_multiplot_graph.nim"><img src="examples/images/streaming_multiplot_graph2.gif" alt="Animated responsive streaming multiplot dashboard"></a><br>
       <strong><a href="examples/streaming_multiplot_graph.nim"><code>streaming_multiplot_graph.nim</code></a></strong><br>
+      <code>nim r --path:src examples/streaming_multiplot_graph.nim</code><br>
       Two live graphs in a resize-aware full-screen dashboard.
     </td>
   </tr>
@@ -319,6 +355,7 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
     <td colspan="2">
       <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines"></a><br>
       <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong><br>
+      <code>nim r --path:src examples/streaming_sparklines.nim</code><br>
       A compact CPU and memory dashboard from reusable sparklines.
     </td>
   </tr>
@@ -339,7 +376,11 @@ echo "visible cells: ", displayWidth(red("A界BC"))
 ## Examples
 
 Each screenshot above links to its focused runnable example. For a finite tour
-of every graph family, run `nim r examples/all_graphs.nim`:
+of every graph family, run:
+
+```sh
+nim r --path:src examples/all_graphs.nim
+```
 
 <details>
 <summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>

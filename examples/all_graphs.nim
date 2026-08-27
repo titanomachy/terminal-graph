@@ -2,6 +2,7 @@
 ##
 ## The live graph examples render snapshots here instead of taking over the
 ## terminal, so this showcase always completes on its own.
+# Run with: nim r --path:src examples/all_graphs.nim
 
 when isMainModule:
   import std/[math, terminal]

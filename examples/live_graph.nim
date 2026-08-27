@@ -1,4 +1,5 @@
 ## Continuously update a graph in place. Stop it with Ctrl+C.
+# Run with: nim r --path:src examples/live_graph.nim
 
 when isMainModule:
   import std/[math, os, random, terminal]

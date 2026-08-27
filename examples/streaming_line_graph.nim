@@ -1,4 +1,5 @@
 ## Connected, colored streaming lines. Stop with Ctrl+C.
+# Run with: nim r --path:src examples/streaming_line_graph.nim
 
 when isMainModule:
   import std/[math, os, random]
