@@ -125,7 +125,7 @@ echo plot(
 )
 ```
 
-<p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output"></a></p>
+<p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output" width="360"></a></p>
 
 ### Horizontal bars
 
@@ -145,7 +145,7 @@ echo plotBars(
 )
 ```
 
-<p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output"></a></p>
+<p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output" width="620"></a></p>
 
 ### OHLC candles
 
@@ -190,7 +190,7 @@ echo plotScatter([
 ], options)
 ```
 
-<p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output"></a></p>
+<p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output" width="620"></a></p>
 
 ### Static graphs
 
@@ -240,7 +240,7 @@ options.caption = "Service heatmap"
 echo plotContour(field, options)
 ```
 
-<p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output"></a></p>
+<p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output" width="620"></a></p>
 
 ### Multiplot layouts
 
