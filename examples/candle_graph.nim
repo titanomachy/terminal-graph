@@ -21,5 +21,10 @@ when isMainModule:
   options.height = 14
   options.caption = "Daily OHLC"
   options.unit = "USD"
+  options.risingColor = ModernGraphPalette.green
+  options.fallingColor = ModernGraphPalette.red
+  options.unchangedColor = ModernGraphPalette.yellow
+  options.axisColor = ModernGraphPalette.brightBlack
+  options.labelColor = ModernGraphPalette.white
 
   echo plotCandles(periods, prices, options)

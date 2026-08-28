@@ -14,6 +14,10 @@ when isMainModule:
     graphHeight(8),
     graphWidth(40),
     graphCaption("Request latency"),
+    graphCaptionColor(ModernGraphPalette.brightWhite),
+    graphAxisColor(ModernGraphPalette.brightBlack),
+    graphLabelColor(ModernGraphPalette.white),
+    graphSeriesColors(ModernGraphSeriesColors),
     graphYAxisFormatter(proc(value: float64): string = &"{value:.1f} ms"),
     graphXAxisRange(0.0, 14.0),
     graphXAxisTickCount(4)
@@ -28,9 +32,12 @@ when isMainModule:
 
   echo plotMany(
     services,
-    graphSeriesColors([colorBrightCyan, colorBrightYellow]),
+    graphSeriesColors(ModernGraphSeriesColors),
     graphSeriesLegends(["API", "worker"]),
-    graphCaption("Colored service comparison")
+    graphCaption("Colored service comparison"),
+    graphCaptionColor(ModernGraphPalette.brightWhite),
+    graphAxisColor(ModernGraphPalette.brightBlack),
+    graphLabelColor(ModernGraphPalette.white)
   )
 
   echo "\n"
@@ -42,8 +49,11 @@ when isMainModule:
     graphWidth(30),
     lowerBound(0.0),
     upperBound(100.0),
-    graphColorGradient(HeatmapSpectrum),
-    graphColorAbove(colorBrightRed, 80.0),
-    graphColorBelow(colorGreen, 25.0),
-    graphCaption("CPU %: red critical, green idle")
+    graphColorGradient(ModernGraphGradient),
+    graphColorAbove(ModernGraphPalette.red, 80.0),
+    graphColorBelow(ModernGraphPalette.green, 25.0),
+    graphCaption("CPU %: rose critical, emerald idle"),
+    graphCaptionColor(ModernGraphPalette.brightWhite),
+    graphAxisColor(ModernGraphPalette.brightBlack),
+    graphLabelColor(ModernGraphPalette.white)
   )

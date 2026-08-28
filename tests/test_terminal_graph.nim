@@ -122,6 +122,18 @@ suite "terminal_graph rendering":
     check "\e[46m" in frame
     check "█" in stripAnsi(frame)
 
+  test "renders static series with TerminalStyle true colors":
+    var plotter = initStaticGraph("Modern")
+    let fill = plotter.addSeries(
+      "values", style = psFill, color = ModernGraphPalette.green,
+      marker = "▄")
+    plotter.push(fill, [1.0, 2.0])
+
+    let frame = plotter.render(width = 30, height = 10, useColor = true)
+
+    check ansiCode(ModernGraphPalette.green) in frame
+    check ansiCode(ModernGraphPalette.green, cpBackground) in frame
+
   test "can omit statistics and preserves off-screen history":
     var plotter = initPlotter("History", maxSamples = 100)
     let line = plotter.addSeries("values", marker = "+")

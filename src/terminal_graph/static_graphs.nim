@@ -16,6 +16,8 @@
 import std/[deques, math, options, sequtils, strformat, strutils, terminal,
   unicode]
 
+import terminal_style
+
 const
   DefaultMaxSamples* = 1_000
     ## Default number of samples retained per series.
@@ -33,7 +35,7 @@ type
     ## Configuration for one series. Samples are managed through ``Plotter``.
     name*: string
     style*: PlotStyle
-    color*: ForegroundColor
+    color*: TerminalColor
     marker*: string
     data: Deque[float64]
 
@@ -93,7 +95,7 @@ proc initStaticGraph*(title: string; unit = "";
   initPlotter(title, unit, maxSamples)
 
 proc addSeries*(plotter: var Plotter; name: string; style = psLine;
-                color = fgCyan; marker = "•"): int {.discardable.} =
+                color = colorCyan; marker = "•"): int {.discardable.} =
   ## Adds a series and returns the index used by ``push`` and related procs.
   ##
   ## A marker must contain exactly one Unicode code point so every sample maps
@@ -110,6 +112,24 @@ proc addSeries*(plotter: var Plotter; name: string; style = psLine;
     data: initDeque[float64]()
   )
   plotter.series.high
+
+proc terminalColor(color: ForegroundColor): TerminalColor =
+  ## Converts the legacy ``std/terminal`` color vocabulary.
+  case color
+  of fgBlack: colorBlack
+  of fgRed: colorRed
+  of fgGreen: colorGreen
+  of fgYellow: colorYellow
+  of fgBlue: colorBlue
+  of fgMagenta: colorMagenta
+  of fgCyan: colorCyan
+  of fgWhite: colorWhite
+  of fg8Bit, fgDefault: colorDefault
+
+proc addSeries*(plotter: var Plotter; name: string; style = psLine;
+                color: ForegroundColor; marker = "•"): int {.discardable.} =
+  ## Compatibility overload for callers using ``std/terminal`` colors.
+  plotter.addSeries(name, style, terminalColor(color), marker)
 
 proc seriesCount*(plotter: Plotter): int =
   ## Returns the number of configured series.
@@ -255,19 +275,19 @@ proc formattedAxisValue(value: float64): string =
     result = formatFloat(value, ffScientific, 0)
   result = strutils.align(result, 7)
 
-proc appendColor(buffer: var string; color: ForegroundColor;
+proc appendColor(buffer: var string; color: TerminalColor;
                  useColor: bool) =
   if useColor:
-    buffer.add ansiForegroundColorCode(color)
+    buffer.add ansiCode(color)
 
-proc appendBackgroundColor(buffer: var string; color: ForegroundColor;
+proc appendBackgroundColor(buffer: var string; color: TerminalColor;
                            useColor: bool) =
   if useColor:
-    buffer.add ansiStyleCode(ord(color) + 10)
+    buffer.add ansiCode(color, cpBackground)
 
 proc appendReset(buffer: var string; useColor: bool) =
   if useColor:
-    buffer.add ansiResetCode
+    buffer.add termClear
 
 proc render*(plotter: Plotter; width = 0; height = 0;
              useColor = true; showStats = true): string =
@@ -293,8 +313,8 @@ proc render*(plotter: Plotter; width = 0; height = 0;
   result = newStringOfCap(frameWidth * frameHeight * 2)
 
   if useColor:
-    result.add ansiForegroundColorCode(fgWhite)
-    result.add ansiStyleCode(styleBright)
+    result.add ansiCode(colorWhite)
+    result.add ansiCode(taBold)
   result.add plotter.title
   if plotter.unit.len > 0:
     result.add &" ({plotter.unit})"
@@ -320,7 +340,7 @@ proc render*(plotter: Plotter; width = 0; height = 0;
 
   var
     grid = newSeqWith(plotHeight, newSeqWith(plotWidth, " "))
-    colors = newSeqWith(plotHeight, newSeqWith(plotWidth, fgDefault))
+    colors = newSeqWith(plotHeight, newSeqWith(plotWidth, colorDefault))
 
   for series in plotter.series:
     let
@@ -361,26 +381,26 @@ proc render*(plotter: Plotter; width = 0; height = 0;
       else:
         repeat(' ', yLabelWidth)
 
-    result.appendColor(fgWhite, useColor)
+    result.appendColor(colorWhite, useColor)
     result.add label & "┤"
     result.appendReset(useColor)
 
     var
-      activeColor = fgDefault
-      activeBackground = fgDefault
+      activeColor = colorDefault
+      activeBackground = colorDefault
     for column in 0 ..< plotWidth:
       let cellColor = colors[row][column]
       if cellColor != activeColor:
         result.appendReset(useColor)
-        activeBackground = fgDefault
-        if cellColor != fgDefault:
+        activeBackground = colorDefault
+        if cellColor != colorDefault:
           result.appendColor(cellColor, useColor)
         activeColor = cellColor
-      let cellBackground = if cellColor != fgDefault and
+      let cellBackground = if cellColor != colorDefault and
           grid[row][column] == "█":
         cellColor
       else:
-        fgDefault
+        colorDefault
       if cellBackground != activeBackground:
         result.appendBackgroundColor(cellBackground, useColor)
         activeBackground = cellBackground
@@ -392,7 +412,7 @@ proc render*(plotter: Plotter; width = 0; height = 0;
   let timeline = &"← last {plotWidth} samples"
   result.add repeat(' ', yLabelWidth + 1)
   if useColor:
-    result.add ansiForegroundColorCode(fgBlack)
-    result.add ansiStyleCode(styleBright)
+    result.add ansiCode(colorBlack)
+    result.add ansiCode(taBold)
   result.add timeline
   result.appendReset(useColor)

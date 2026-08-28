@@ -24,6 +24,7 @@ when isMainModule:
   surfaceOptions.height = 40
   surfaceOptions.showScale = false
   surfaceOptions.caption = "High-resolution surface"
+  surfaceOptions.palette = @ModernGraphGradient
   let surface = plotSurface(field, surfaceOptions)
 
   var contourOptions = surfaceOptions

@@ -3,15 +3,13 @@
 # Run with: nim r --path:src examples/static_graph.nim
 
 when isMainModule:
-  import std/terminal
-
   import ../src/terminal_graph
 
   var graph = initStaticGraph("Weekly request volume", unit = "requests")
   let requests = graph.addSeries(
     "requests",
     style = psFill,
-    color = fgGreen,
+    color = ModernGraphPalette.green,
     marker = "▄"
   )
 

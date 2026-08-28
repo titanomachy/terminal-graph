@@ -5,12 +5,12 @@
 # Run with: nim r --path:src examples/all_graphs.nim
 
 when isMainModule:
-  import std/[math, terminal]
+  import std/math
 
   import ../src/terminal_graph
 
   proc section(title: string) =
-    echo "\n", bold(cyan("=== ", title, " ==="))
+    echo "\n", styled(ModernGraphHeadingStyle, "=== ", title, " ===")
 
   proc responsiveMultiplot(
       plots: openArray[string]; horizontalGap = 4; verticalGap = 1;
@@ -28,25 +28,33 @@ when isMainModule:
     multiplot(plots, layout)
 
   section("Terminal styling")
-  let heading = initTerminalStyle(
-    foreground = hexColor("#78c8ff"),
-    background = indexedColor(17),
+  let badge = initTerminalStyle(
+    foreground = ModernGraphPalette.brightWhite,
+    background = ModernGraphPalette.blue,
     attributes = {taBold, taUnderline}
   )
-  echo styled(heading, " standard, ANSI-256, and RGB styling ")
-  echo bold("nested ", brightMagenta("styles"), " restore correctly"),
-    "  ", onRgb(35, 42, 58, brightYellow(" true color "))
+  echo styled(badge, " shared TerminalStyle palette ")
+  echo styled(ModernGraphMutedStyle, "slate supporting text"), "  ",
+    foreground(ModernGraphPalette.magenta, "composable true color")
 
   section("Sparklines")
-  echo "Latency  ", sparkline([18, 21, 19, 26, 34, 31, 45, 38, 29, 24])
-  echo "Load     ", sparkline([10, 25, 40, 75, 100])
+  var sparkOptions = initSparklineOptions()
+  sparkOptions.useColor = true
+  sparkOptions.palette = @ModernGraphGradient
+  echo "Latency  ", sparkline(
+    [18, 21, 19, 26, 34, 31, 45, 38, 29, 24], sparkOptions)
+  echo "Load     ", sparkline([10, 25, 40, 75, 100], sparkOptions)
 
   section("Connected line graph")
   echo plot(
     [3.0, 4.0, 9.0, 6.0, 2.0, 4.0, 5.0, 8.0],
     graphWidth(34),
     graphHeight(8),
-    graphCaption("Request latency")
+    graphCaption("Request latency"),
+    graphSeriesColors(ModernGraphSeriesColors),
+    graphCaptionColor(ModernGraphPalette.brightWhite),
+    graphAxisColor(ModernGraphPalette.brightBlack),
+    graphLabelColor(ModernGraphPalette.white)
   )
 
   section("Horizontal bar graphs")
@@ -61,7 +69,7 @@ when isMainModule:
   barOptions.caption = "Grouped change"
   barOptions.unit = "%"
   barOptions.seriesLegends = @["current", "previous"]
-  barOptions.seriesColors = @[colorBrightCyan, colorBrightYellow]
+  barOptions.seriesColors = @ModernGraphSeriesColors
   let groupedBars = plotBars(regions, results, barOptions)
   barOptions.mode = bmStacked
   barOptions.caption = "Stacked change"
@@ -71,7 +79,7 @@ when isMainModule:
   var requestOptions = initBarGraphOptions()
   requestOptions.width = 28
   requestOptions.caption = "Simple bar graph"
-  requestOptions.seriesColors = @[colorBrightYellow]
+  requestOptions.seriesColors = @ModernGraphSeriesColors
   echo "\n", plotBars(
     regions,
     [42.0, 31.0, 37.0, 28.0],
@@ -93,6 +101,11 @@ when isMainModule:
   candleOptions.height = 10
   candleOptions.caption = "Daily OHLC"
   candleOptions.unit = "USD"
+  candleOptions.risingColor = ModernGraphPalette.green
+  candleOptions.fallingColor = ModernGraphPalette.red
+  candleOptions.unchangedColor = ModernGraphPalette.yellow
+  candleOptions.axisColor = ModernGraphPalette.brightBlack
+  candleOptions.labelColor = ModernGraphPalette.white
   let staticCandles = plotCandles(
     candleLabels, candlePrices, candleOptions)
   var liveCandles = initLiveCandleGraph(
@@ -116,13 +129,15 @@ when isMainModule:
   xyOptions.height = 10
   xyOptions.xLabel = "time"
   xyOptions.yLabel = "value"
+  xyOptions.axisColor = ModernGraphPalette.brightBlack
+  xyOptions.labelColor = ModernGraphPalette.white
   xyOptions.caption = "Irregular line"
   let connected = plotXYMany([
-    initXYSeries("signal", irregular, colorBrightCyan, marker = "●")
+    initXYSeries("signal", irregular, ModernGraphSeriesColors[0], marker = "●")
   ], xyOptions)
   xyOptions.caption = "Scatter samples"
   let scattered = plotScatterMany([
-    initXYSeries("samples", observations, colorBrightYellow, marker = "◆")
+    initXYSeries("samples", observations, ModernGraphSeriesColors[1], marker = "◆")
   ], xyOptions)
   echo responsiveMultiplot([connected, scattered])
 
@@ -135,10 +150,10 @@ when isMainModule:
   section("Static graph")
   var staticGraph = initStaticGraph("Weekly requests", unit = "requests")
   let requests = staticGraph.addSeries(
-    "requests", style = psFill, color = fgGreen, marker = "▄"
+    "requests", style = psFill, color = ModernGraphPalette.green, marker = "▄"
   )
   staticGraph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
-  echo staticGraph.render(width = 54, height = 10, useColor = false)
+  echo staticGraph.render(width = 54, height = 10, useColor = true)
 
   section("Live marker graph snapshot")
   var liveGraph = initLiveGraph(
@@ -146,7 +161,8 @@ when isMainModule:
     useColor = true
   )
   let throughput = liveGraph.addSeries(
-    "throughput", style = psFill, color = fgCyan, marker = "▄"
+    "throughput", style = psFill,
+    color = ModernGraphSeriesColors[0], marker = "▄"
   )
   liveGraph.push(throughput,
     [40.0, 48.0, 55.0, 51.0, 64.0, 58.0, 70.0, 66.0])
@@ -157,8 +173,11 @@ when isMainModule:
   streamConfig.width = 40
   streamConfig.height = 8
   streamConfig.caption = "Streaming API latency"
-  streamConfig.seriesColors = @[colorBrightCyan, colorBrightYellow]
+  streamConfig.seriesColors = @ModernGraphSeriesColors
   streamConfig.seriesLegends = @["p50", "p95"]
+  streamConfig.captionColor = ModernGraphPalette.brightWhite
+  streamConfig.axisColor = ModernGraphPalette.brightBlack
+  streamConfig.labelColor = ModernGraphPalette.white
   var streaming = initLiveLineGraph(
     seriesCount = 2, maxSamples = 40, config = streamConfig
   )
@@ -171,10 +190,13 @@ when isMainModule:
   throughputConfig.width = 27
   throughputConfig.height = 7
   throughputConfig.caption = "Throughput (req/s)"
-  throughputConfig.seriesColors = @[colorBrightCyan]
+  throughputConfig.seriesColors = @ModernGraphSeriesColors
+  throughputConfig.captionColor = ModernGraphPalette.brightWhite
+  throughputConfig.axisColor = ModernGraphPalette.brightBlack
+  throughputConfig.labelColor = ModernGraphPalette.white
   var latencyConfig = throughputConfig
   latencyConfig.caption = "Latency (ms)"
-  latencyConfig.seriesColors = @[colorBrightYellow]
+  latencyConfig.seriesColors = @[ModernGraphSeriesColors[1]]
   var
     streamingThroughput = initLiveLineGraph(
       maxSamples = 30, config = throughputConfig)
@@ -208,6 +230,7 @@ when isMainModule:
   surfaceOptions.height = 16
   surfaceOptions.showScale = false
   surfaceOptions.caption = "2D surface"
+  surfaceOptions.palette = @ModernGraphGradient
   let surface = plotSurface(field, surfaceOptions)
   var contourOptions = surfaceOptions
   contourOptions.height = 8

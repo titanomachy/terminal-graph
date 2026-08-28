@@ -2,31 +2,39 @@
 # Run with: nim r --path:src examples/live_graph.nim
 
 when isMainModule:
-  import std/[math, os, random, terminal]
+  import std/[atomics, math, os, random]
 
   import ../src/terminal_graph
 
   randomize()
 
+  var stopRequested: Atomic[bool]
+
+  proc requestStop() {.noconv.} =
+    ## A signal handler may only perform signal-safe work.
+    stopRequested.store(true, moRelaxed)
+
   var graph = initLiveGraph("Live service metrics", unit = "req/s")
   let throughput = graph.addSeries(
     "throughput",
     style = psFill,
-    color = fgCyan,
+    color = ModernGraphSeriesColors[0],
     marker = "▄"
   )
   let errors = graph.addSeries(
     "errors",
     style = psLine,
-    color = fgYellow,
+    color = ModernGraphSeriesColors[1],
     marker = "•"
   )
 
   var step = 0.0
 
-  graph.startLive()
+  stopRequested.store(false, moRelaxed)
+  setControlCHook(requestStop)
   try:
-    while true:
+    graph.startLive()
+    while not stopRequested.load(moRelaxed):
       step += 0.05
       graph.push(throughput,
         max(40.0 + sin(step) * 22.0 + rand(8.0) - 4.0, 0.0))
@@ -39,4 +47,10 @@ when isMainModule:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard
   finally:
-    graph.stopLive()
+    try:
+      graph.stopLive()
+    except IOError:
+      discard
+    finally:
+      when declared(unsetControlCHook):
+        unsetControlCHook()

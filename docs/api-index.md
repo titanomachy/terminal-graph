@@ -26,11 +26,15 @@ echo plot(
   graphWidth(40),
   graphHeight(8),
   graphCaption("Request latency"),
-  graphSeriesColors([colorBrightCyan])
+  graphSeriesColors(ModernGraphSeriesColors)
 )
 ```
 
 ## Chart modules
+
+- [`palettes`](terminal_graph/palettes.html) — a modern dark-terminal
+  TerminalStyle palette, categorical series colors, value gradient, and
+  reusable heading styles.
 
 - [`line_graphs`](terminal_graph/line_graphs.html) — connected single- and
   multi-series charts, axes, labels, legends, gradients, and thresholds.

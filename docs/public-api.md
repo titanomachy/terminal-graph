@@ -6,6 +6,9 @@ candles, line charts, scatter and XY charts, static frames, streaming displays,
 sparklines, surfaces, contours, and multiplot grids. `all_graphs.nim` provides
 the finite aggregate showcase.
 
+The examples share `ModernGraphPalette`, `ModernGraphSeriesColors`, and
+`ModernGraphGradient` from the public `terminal_graph/palettes` module.
+
 `LiveDashboard` provides resize-safe full-screen lifecycle management for
 arbitrary composed frames. `LiveGraph`, `LiveLineGraph`, and `LiveCandleGraph`
 retain their focused data and rendering APIs and can supply frames through

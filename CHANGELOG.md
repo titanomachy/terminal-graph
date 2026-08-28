@@ -2,6 +2,14 @@
 
 This project follows Semantic Versioning.
 
+[Unreleased]
+
+### Fixed
+
+- Exit every interactive streaming example cleanly on Ctrl+C by requesting
+  shutdown through an atomic signal flag, restoring the live terminal session,
+  and only then removing the temporary control hook.
+
 [0.1.1] - 2026-08-24
 
 ### Added

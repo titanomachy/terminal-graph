@@ -12,15 +12,31 @@ when isMainModule:
     steadyState = [5.0, 5.0, 5.0, 5.0]
     interrupted = [0.0, 2.0, NaN, 6.0, 8.0]
 
-  echo "Response time  ", sparkline(responseTimes), "  ms"
-  echo "Temperature    ", sparkline(temperatures), "  °C"
-  echo "Steady state   ", sparkline(steadyState)
-  echo "With a gap     ", sparkline(interrupted)
+  var colors = initSparklineOptions()
+  colors.useColor = true
+  colors.palette = @ModernGraphGradient
+
+  echo ""
+  echo "Response time    ", sparkline(responseTimes, colors), "  ms"
+  echo ""
+  echo "Temperature      ", sparkline(temperatures, colors), "  °C"
+  echo ""
+  echo "Steady state     ", sparkline(steadyState)
+  echo ""
+  echo "With a gap       ", sparkline(interrupted)
+  echo ""
 
   var sharedScale = initSparklineOptions()
   sharedScale.setSparklineRange(0.0, 100.0)
-  echo "Shared 0–100   ", sparkline([10, 25, 40, 75, 100], sharedScale)
+  echo "Shared 0–100     ", sparkline([10, 25, 40, 75, 100], sharedScale)
+  echo ""
 
-  var fire = sharedScale
-  fire.useColor = true
-  echo "Fire gradient  ", sparkline([10, 25, 40, 75, 100], fire)
+  var modernGradient = sharedScale
+  modernGradient.useColor = true
+  modernGradient.palette = @[
+    hexColor("#22D3EE"), hexColor("#39C8F0"), hexColor("#4FBCF2"),
+    hexColor("#66B1F4"), hexColor("#7CA6F6"), hexColor("#939BF8"),
+    hexColor("#A98FFA"), hexColor("#C084FC")
+  ]
+  echo "Modern gradient  ", sparkline(
+    [10, 25, 40, 75, 100], modernGradient)

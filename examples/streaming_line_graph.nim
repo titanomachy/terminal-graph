@@ -2,18 +2,27 @@
 # Run with: nim r --path:src examples/streaming_line_graph.nim
 
 when isMainModule:
-  import std/[math, os, random]
+  import std/[atomics, math, os, random]
 
   import ../src/terminal_graph
 
   randomize()
 
+  var stopRequested: Atomic[bool]
+
+  proc requestStop() {.noconv.} =
+    ## A signal handler may only perform signal-safe work.
+    stopRequested.store(true, moRelaxed)
+
   var config = initAsciiGraphConfig()
   config.width = 60
   config.height = 12
   config.caption = "Live API latency"
-  config.seriesColors = @[colorBrightCyan, colorBrightYellow]
+  config.seriesColors = @ModernGraphSeriesColors
   config.seriesLegends = @["p50", "p95"]
+  config.captionColor = ModernGraphPalette.brightWhite
+  config.axisColor = ModernGraphPalette.brightBlack
+  config.labelColor = ModernGraphPalette.white
 
   var graph = initLiveLineGraph(
     seriesCount = 2,
@@ -22,9 +31,11 @@ when isMainModule:
   )
 
   var step = 0.0
-  graph.startLive()
+  stopRequested.store(false, moRelaxed)
+  setControlCHook(requestStop)
   try:
-    while true:
+    graph.startLive()
+    while not stopRequested.load(moRelaxed):
       step += 0.06
       graph.push(0, 20.0 + sin(step) * 5.0 + rand(2.0))
       graph.push(1, 40.0 + cos(step * 0.7) * 12.0 + rand(5.0))
@@ -33,4 +44,10 @@ when isMainModule:
   except IOError:
     discard
   finally:
-    graph.stopLive()
+    try:
+      graph.stopLive()
+    except IOError:
+      discard
+    finally:
+      when declared(unsetControlCHook):
+        unsetControlCHook()

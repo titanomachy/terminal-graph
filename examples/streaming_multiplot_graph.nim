@@ -3,7 +3,7 @@
 # Run with: nim r --path:src examples/streaming_multiplot_graph.nim
 
 when isMainModule:
-  import std/[atomics, math, os, random, terminal]
+  import std/[atomics, math, os, random]
 
   import ../src/terminal_graph
 
@@ -13,7 +13,7 @@ when isMainModule:
 
   proc requestStop() {.noconv.} =
     ## A signal handler may only perform signal-safe work.
-    stopRequested.store(true)
+    stopRequested.store(true, moRelaxed)
 
   var
     dashboard = initLiveDashboard()
@@ -28,9 +28,9 @@ when isMainModule:
     step = 0.0
   let
     throughputSeries = throughput.addSeries(
-      "throughput", color = fgCyan, marker = "•")
+      "throughput", color = ModernGraphSeriesColors[0], marker = "•")
     latencySeries = latency.addSeries(
-      "latency", color = fgYellow, marker = "•")
+      "latency", color = ModernGraphSeriesColors[1], marker = "•")
     renderThroughput: MultiplotRenderer = proc(width: int): string =
       var view = throughput
       view.width = width
@@ -50,10 +50,11 @@ when isMainModule:
     multiplotBreakpoint(70, 2)
   ]
 
-  dashboard.startLive()
+  stopRequested.store(false, moRelaxed)
   setControlCHook(requestStop)
   try:
-    while not stopRequested.load():
+    dashboard.startLive()
+    while not stopRequested.load(moRelaxed):
       step += 0.06
       throughput.push(throughputSeries,
         max(70.0 + sin(step) * 20.0 + rand(6.0) - 3.0, 0.0))
@@ -71,6 +72,10 @@ when isMainModule:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard
   finally:
-    when declared(unsetControlCHook):
-      unsetControlCHook()
-    dashboard.stopLive()
+    try:
+      dashboard.stopLive()
+    except IOError:
+      discard
+    finally:
+      when declared(unsetControlCHook):
+        unsetControlCHook()

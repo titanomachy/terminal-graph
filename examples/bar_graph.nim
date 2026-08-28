@@ -16,7 +16,7 @@ when isMainModule:
   options.caption = "Regional change"
   options.unit = "%"
   options.seriesLegends = @["current", "previous"]
-  options.seriesColors = @[colorBrightCyan, colorBrightYellow]
+  options.seriesColors = @ModernGraphSeriesColors
 
   echo plotBars(regions, results, options)
 

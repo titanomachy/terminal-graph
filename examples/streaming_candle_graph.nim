@@ -2,17 +2,28 @@
 # Run with: nim r --path:src examples/streaming_candle_graph.nim
 
 when isMainModule:
-  import std/[os, random, strformat]
+  import std/[atomics, os, random, strformat]
 
   import ../src/terminal_graph
 
   randomize()
+
+  var stopRequested: Atomic[bool]
+
+  proc requestStop() {.noconv.} =
+    ## A signal handler may only perform signal-safe work.
+    stopRequested.store(true, moRelaxed)
 
   var options = initCandlePlotOptions()
   options.width = 60
   options.height = 14
   options.caption = "Live OHLC"
   options.unit = "USD"
+  options.risingColor = ModernGraphPalette.green
+  options.fallingColor = ModernGraphPalette.red
+  options.unchangedColor = ModernGraphPalette.yellow
+  options.axisColor = ModernGraphPalette.brightBlack
+  options.labelColor = ModernGraphPalette.white
 
   # Keep one blank column on either side of each candle so the streaming
   # history remains visually distinct instead of becoming a solid ribbon.
@@ -36,9 +47,11 @@ when isMainModule:
     current = candle(103.0, 103.0, 103.0, 103.0)
   graph.push(current, &"{hour:02}:{minute:02}")
 
-  graph.startLive()
+  stopRequested.store(false, moRelaxed)
+  setControlCHook(requestStop)
   try:
-    while true:
+    graph.startLive()
+    while not stopRequested.load(moRelaxed):
       let nextClose = max(current.close + rand(1.2) - 0.6, 0.01)
       current.high = max(current.high, nextClose)
       current.low = min(current.low, nextClose)
@@ -60,4 +73,10 @@ when isMainModule:
   except IOError:
     discard
   finally:
-    graph.stopLive()
+    try:
+      graph.stopLive()
+    except IOError:
+      discard
+    finally:
+      when declared(unsetControlCHook):
+        unsetControlCHook()

@@ -70,10 +70,10 @@ Then import the complete core API:
 import terminal_graph
 ```
 
-The main module also re-exports `terminal_style`, so colors, reusable styles,
-ANSI stripping, and display-width helpers do not need a second import. Typed
-objects and CSV/JSON parsing use opt-in modules to keep macros and parsers out
-of the core facade.
+The main module also re-exports `terminal_style`, its palette API, and a modern
+dark-terminal graph palette, so colors, reusable styles, ANSI stripping, and
+display-width helpers do not need a second import. Typed objects and CSV/JSON
+parsing use opt-in modules to keep macros and parsers out of the core facade.
 
 ## Quick start
 
@@ -87,7 +87,7 @@ echo plot(
   graphWidth(40),
   graphHeight(8),
   graphCaption("Request latency"),
-  graphSeriesColors([colorBrightCyan])
+  graphSeriesColors(ModernGraphSeriesColors)
 )
 ```
 
@@ -104,7 +104,7 @@ echo plot(
 | [Surfaces and contours](#surfaces-and-contours) | `plotSurface`, `plotContour`, `plot2D` | Matrix or flat data, resampling, fixed ranges, palettes, scales, and plain-text output |
 | [Multiplot layouts](#multiplot-layouts) | `multiplot`, `multiplotResponsive` | ANSI/Unicode-aware grids, auto-fit columns, breakpoints, alignment, and deferred width-aware renderers |
 | [Live displays](#live-displays) | `LiveGraph`, `LiveLineGraph`, `LiveCandleGraph`, `LiveDashboard` | Bounded streaming data, frame rendering, in-place redraws, alternate-screen dashboards, and resize-safe composition |
-| [Terminal styling](#terminal-styling) | Re-exported `terminal_style` API | Standard, bright, ANSI-256, RGB, and hex colors plus ANSI-aware measuring, slicing, padding, and wrapping |
+| [Terminal styling](#terminal-styling) | Re-exported `terminal_style` API and `ModernGraphPalette` | Standard, bright, ANSI-256, RGB, and hex colors; a shared graph palette; plus ANSI-aware measuring, slicing, padding, and wrapping |
 
 Most applications should import `terminal_graph`. Focused imports such as
 `terminal_graph/sparkline_graphs` are also supported. Rendering is string-based
@@ -123,7 +123,7 @@ echo plot(
   graphWidth(40),
   graphHeight(8),
   graphCaption("Request latency"),
-  graphSeriesColors([colorBrightCyan])
+  graphSeriesColors(ModernGraphSeriesColors)
 )
 ```
 
@@ -313,6 +313,11 @@ finally:
   graph.stopLive()
 ```
 
+The interactive examples also install a temporary Ctrl+C hook backed by an
+atomic stop flag. Signal handling remains an application responsibility;
+renderers stay side-effect free, while the live-session API owns cursor,
+screen, and text-attribute restoration.
+
 Use `LiveDashboard` for resize-safe full-screen redraws of arbitrary frames,
 including responsive multiplot output. On supported Windows consoles, live
 sessions enable virtual-terminal processing and restore the original mode.
@@ -367,12 +372,23 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
 
 The façade re-exports `terminal_style`, including standard, indexed, RGB, and
 hex colors; text attributes; and ANSI-aware measuring, slicing, padding, and
-wrapping.
+wrapping. It also provides a true-color palette designed for dark terminal
+backgrounds:
+
+- `ModernGraphPalette` provides named TerminalStyle color roles.
+- `ModernGraphSeriesColors` is an eight-color categorical sequence.
+- `ModernGraphGradient` is a seven-stop cool-to-warm value gradient.
+- `ModernGraphHeadingStyle` and `ModernGraphMutedStyle` style surrounding UI.
 
 ```nim
-echo bold(brightCyan("Build succeeded"))
-echo onRgb(35, 42, 58, brightYellow(" warning "))
-echo "visible cells: ", displayWidth(red("A界BC"))
+var options = initBarGraphOptions()
+options.seriesColors = @ModernGraphSeriesColors
+
+var surfaceOptions = initSurfacePlotOptions()
+surfaceOptions.palette = @ModernGraphGradient
+
+echo styled(ModernGraphHeadingStyle, "Service overview")
+echo plotBars(["API", "Worker"], [42, 31], options)
 ```
 
 ## Examples

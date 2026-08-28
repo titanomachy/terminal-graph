@@ -26,15 +26,17 @@ when isMainModule:
   options.height = 14
   options.xLabel = "time"
   options.yLabel = "value"
+  options.axisColor = ModernGraphPalette.brightBlack
+  options.labelColor = ModernGraphPalette.white
 
   options.caption = "Irregular XY line"
   let connected = plotXYMany([
-    initXYSeries("signal", irregular, colorBrightCyan, marker = "●")
+    initXYSeries("signal", irregular, ModernGraphSeriesColors[0], marker = "●")
   ], options)
 
   options.caption = "Scatter observations"
   let scattered = plotScatterMany([
-    initXYSeries("samples", observations, colorBrightYellow, marker = "◆")
+    initXYSeries("samples", observations, ModernGraphSeriesColors[1], marker = "◆")
   ], options)
 
   var layout = initMultiplotOptions()

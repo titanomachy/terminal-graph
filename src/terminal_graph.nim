@@ -23,10 +23,12 @@
 
 import terminal_style
 import terminal_graph/[bar_graphs, candle_graphs, line_graphs, live_graphs,
-  multiplot_graphs, sparkline_graphs, static_graphs, surface_graphs, xy_graphs]
+  multiplot_graphs, palettes, sparkline_graphs, static_graphs, surface_graphs,
+  xy_graphs]
 
 export bar_graphs, candle_graphs, line_graphs, live_graphs, multiplot_graphs,
-  sparkline_graphs, static_graphs, surface_graphs, terminal_style, xy_graphs
+  palettes, sparkline_graphs, static_graphs, surface_graphs, terminal_style,
+  xy_graphs
 
 when isMainModule:
   echo "Sparkline example:"
@@ -34,6 +36,7 @@ when isMainModule:
 
   echo "\nTerminal graph example:"
   var graph = initPlotter("Sample values")
-  let values = graph.addSeries("values", marker = "x")
+  let values = graph.addSeries(
+    "values", color = ModernGraphSeriesColors[0], marker = "x")
   graph.push(values, [1.0, 5.0, 2.5, 8.0, 12.0, 7.0, 3.0, 9.0])
-  echo graph.render(width = 64, height = 12, useColor = false)
+  echo graph.render(width = 64, height = 12, useColor = true)

@@ -239,8 +239,13 @@ proc initLiveGraph*(title: string; unit = "";
   )
 
 proc addSeries*(graph: var LiveGraph; name: string; style = psLine;
-                color = fgCyan; marker = "•"): int {.discardable.} =
+                color = colorCyan; marker = "•"): int {.discardable.} =
   ## Adds a series to the underlying plotter and returns its index.
+  graph.plotter.addSeries(name, style, color, marker)
+
+proc addSeries*(graph: var LiveGraph; name: string; style = psLine;
+                color: ForegroundColor; marker = "•"): int {.discardable.} =
+  ## Compatibility overload for callers using ``std/terminal`` colors.
   graph.plotter.addSeries(name, style, color, marker)
 
 proc push*(graph: var LiveGraph; seriesIdx: int; value: float64) =

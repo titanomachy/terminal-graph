@@ -20,7 +20,7 @@ when isMainModule:
 
   proc requestStop() {.noconv.} =
     ## A signal handler may only perform signal-safe work.
-    stopRequested.store(true)
+    stopRequested.store(true, moRelaxed)
 
   var
     cpuHistory: seq[float64]
@@ -28,10 +28,11 @@ when isMainModule:
     step = 0.0
     dashboard = initLiveDashboard()
 
-  dashboard.startLive()
+  stopRequested.store(false, moRelaxed)
   setControlCHook(requestStop)
   try:
-    while not stopRequested.load():
+    dashboard.startLive()
+    while not stopRequested.load(moRelaxed):
       step += 0.06
       cpuHistory.pushSample(
         clamp(52.0 + sin(step) * 28.0 + rand(8.0) - 4.0, 0.0, 100.0)
@@ -41,9 +42,11 @@ when isMainModule:
       )
 
       # Keep one blank row above the dashboard for a clean video crop.
-      let frame = "\n" & cyan("CPU     ", sparkline(cpuHistory),
-          "  ", cpuHistory[^1].int, "%") & '\n' &
-        yellow("Memory  ", sparkline(memoryHistory),
+      let frame = "\n" & foreground(ModernGraphSeriesColors[0],
+          "CPU     ", sparkline(cpuHistory),
+          "  ", cpuHistory[^1].int, "%") & '\n' & '\n' &
+        foreground(ModernGraphSeriesColors[1],
+          "Memory  ", sparkline(memoryHistory),
           "  ", memoryHistory[^1].int, "%")
       dashboard.draw(frame)
 
@@ -52,6 +55,10 @@ when isMainModule:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard
   finally:
-    when declared(unsetControlCHook):
-      unsetControlCHook()
-    dashboard.stopLive()
+    try:
+      dashboard.stopLive()
+    except IOError:
+      discard
+    finally:
+      when declared(unsetControlCHook):
+        unsetControlCHook()

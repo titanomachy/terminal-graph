@@ -10,13 +10,16 @@ when isMainModule:
     graphWidth(26),
     graphHeight(7),
     graphCaption("Request latency"),
-    graphSeriesColors([colorBrightCyan])
+    graphSeriesColors(ModernGraphSeriesColors),
+    graphCaptionColor(ModernGraphPalette.brightWhite),
+    graphAxisColor(ModernGraphPalette.brightBlack),
+    graphLabelColor(ModernGraphPalette.white)
   )
 
   var barOptions = initBarGraphOptions()
   barOptions.width = 22
   barOptions.caption = "Requests by region"
-  barOptions.seriesColors = @[colorBrightYellow]
+  barOptions.seriesColors = @ModernGraphSeriesColors
   let requests = plotBars(
     ["North", "South", "East", "West"],
     [42.0, 31.0, 37.0, 28.0],
@@ -29,6 +32,8 @@ when isMainModule:
   xyOptions.caption = "Latency samples"
   xyOptions.xLabel = "time"
   xyOptions.yLabel = "ms"
+  xyOptions.axisColor = ModernGraphPalette.brightBlack
+  xyOptions.labelColor = ModernGraphPalette.white
   let samples = plotScatter([
     xyPoint(-3.0, 2.0), xyPoint(-1.2, 4.5), xyPoint(0.0, 3.0),
     xyPoint(1.8, 6.0), xyPoint(3.0, 5.0)
@@ -40,6 +45,7 @@ when isMainModule:
   contourOptions.caption = "Service heatmap"
   contourOptions.showScale = false
   contourOptions.contourLevels = 7
+  contourOptions.palette = @ModernGraphGradient
   let heatmap = plotContour(@[
     @[0.0, 0.2, 0.5, 0.8, 1.0],
     @[0.1, 0.4, 0.9, 0.6, 0.3],
