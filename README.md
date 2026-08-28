@@ -355,7 +355,7 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
   </tr>
   <tr>
     <td colspan="2">
-      <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines"></a><br>
+      <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines" width="30%"></a><br>
       <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong><br>
       <code>nim r --path:src examples/streaming_sparklines.nim</code><br>
       A compact CPU and memory dashboard from reusable sparklines.
