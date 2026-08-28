@@ -1,5 +1,7 @@
 # TerminalGraph
 
+[![Coverage](https://titanomachy.github.io/terminal-graph/coverage.svg)](https://github.com/titanomachy/terminal-graph/actions/workflows/docs.yml)
+
 Pure-Nim terminal charts: connected lines, horizontal bars, static and live
 OHLC candles, irregular XY and scatter plots, responsive multiplot dashboards,
 2D surfaces, filled contours, and sparklines.

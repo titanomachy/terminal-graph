@@ -1,6 +1,8 @@
 # Nim compiler output
 nimcache/
+build/
 htmldocs/
+coverage.info
 
 # Executables produced beside source entry points
 /app

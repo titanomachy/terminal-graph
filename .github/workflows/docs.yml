@@ -23,8 +23,48 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install terminal_style from GitHub
         run: nimble install -y https://github.com/titanomachy/terminal-style
+      - name: Install coverage tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes lcov
+      - name: Run tests with coverage
+        run: |
+          mkdir -p build/coverage build/nimcache/coverage
+
+          for test_file in tests/*.nim; do
+            test_name="$(basename "$test_file" .nim)"
+            nim c -r \
+              --path:src \
+              --debugger:native \
+              --passC:--coverage \
+              --passL:--coverage \
+              --nimcache:"build/nimcache/coverage/$test_name" \
+              --out:"build/coverage/$test_name" \
+              "$test_file"
+          done
+      - name: Collect source coverage
+        run: |
+          lcov \
+            --capture \
+            --directory build/nimcache/coverage \
+            --output-file coverage.info \
+            --ignore-errors inconsistent,mismatch
+
+          lcov \
+            --extract coverage.info \
+            "$GITHUB_WORKSPACE/src/*" \
+            --output-file coverage.info \
+            --ignore-errors inconsistent,unused
+
+          lcov \
+            --summary coverage.info \
+            --ignore-errors inconsistent,corrupt
       - name: Generate API documentation
         run: nimble docs -y
+      - name: Generate coverage badge
+        run: |
+          bash scripts/coverage_badge.sh coverage.info htmldocs/coverage.svg
+          touch htmldocs/.nojekyll
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload documentation
@@ -34,6 +74,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       pages: write
