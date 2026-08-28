@@ -5,3 +5,7 @@ import std/os
 let siblingStyles = thisDir() / ".." / "terminal-style" / "src"
 if dirExists(siblingStyles):
   switch("path", siblingStyles)
+# begin Nimble config (version 2)
+when withDir(thisDir(), system.fileExists("nimble.paths")):
+  include "nimble.paths"
+# end Nimble config
