@@ -2,6 +2,11 @@
 
 [![Coverage](https://titanomachy.github.io/terminal-graph/coverage.svg)](https://github.com/titanomachy/terminal-graph/actions/workflows/docs.yml)
 
+> [!NOTE]
+> The animated line graph examples may appear less fluid than the actual terminal
+> output because of an unresolved issue in the automatic media rendering process.
+> All line graphs render fluidly when run directly in a terminal.
+
 Pure-Nim terminal charts: connected lines, horizontal bars, static and live
 OHLC candles, irregular XY and scatter plots, responsive multiplot dashboards,
 2D surfaces, filled contours, and sparklines.
