@@ -6,7 +6,12 @@ when isMainModule:
 
   import ../src/terminal_graph
 
-  randomize()
+  const RecordingFrameLimit = 50
+  let recordingMode = getEnv("TERMINAL_GRAPH_RECORDING") == "1"
+  if recordingMode:
+    randomize(42)
+  else:
+    randomize()
 
   var stopRequested: Atomic[bool]
 
@@ -44,6 +49,7 @@ when isMainModule:
     hour = 9
     minute = 33
     ticksInPeriod = 0
+    renderedFrames = 0
     current = candle(103.0, 103.0, 103.0, 103.0)
   graph.push(current, &"{hour:02}:{minute:02}")
 
@@ -58,7 +64,10 @@ when isMainModule:
       current.close = nextClose
       graph.updateLatest(current)
       graph.draw()
+      inc renderedFrames
       sleep(100)
+      if recordingMode and renderedFrames >= RecordingFrameLimit:
+        break
 
       inc ticksInPeriod
       if ticksInPeriod == 10:

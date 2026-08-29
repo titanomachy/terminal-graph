@@ -13,7 +13,7 @@ const
   ModernGraphPalette* = initTerminalPalette(
     black = hexColor("#111827"),
     red = hexColor("#FB7185"),
-    green = hexColor("#34D399"),
+    green = hexColor("#22C55E"),
     yellow = hexColor("#FBBF24"),
     blue = hexColor("#60A5FA"),
     magenta = hexColor("#C084FC"),
@@ -21,7 +21,7 @@ const
     white = hexColor("#CBD5E1"),
     brightBlack = hexColor("#64748B"),
     brightRed = hexColor("#FDA4AF"),
-    brightGreen = hexColor("#6EE7B7"),
+    brightGreen = hexColor("#4ADE80"),
     brightYellow = hexColor("#FCD34D"),
     brightBlue = hexColor("#93C5FD"),
     brightMagenta = hexColor("#D8B4FE"),
@@ -63,4 +63,3 @@ const
     foreground = ModernGraphPalette.brightBlack
   )
     ## Reusable style for secondary labels and supporting text.
-

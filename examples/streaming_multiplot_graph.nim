@@ -7,7 +7,12 @@ when isMainModule:
 
   import ../src/terminal_graph
 
-  randomize()
+  const RecordingFrameLimit = 120
+  let recordingMode = getEnv("TERMINAL_GRAPH_RECORDING") == "1"
+  if recordingMode:
+    randomize(42)
+  else:
+    randomize()
 
   var stopRequested: Atomic[bool]
 
@@ -26,6 +31,7 @@ when isMainModule:
       width = 38, height = 10, showStats = false
     )
     step = 0.0
+    renderedFrames = 0
   let
     throughputSeries = throughput.addSeries(
       "throughput", color = ModernGraphSeriesColors[0], marker = "•")
@@ -67,7 +73,10 @@ when isMainModule:
         [renderThroughput, renderLatency], layout
       )
       dashboard.draw(frame)
+      inc renderedFrames
       sleep(33)
+      if recordingMode and renderedFrames >= RecordingFrameLimit:
+        break
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard

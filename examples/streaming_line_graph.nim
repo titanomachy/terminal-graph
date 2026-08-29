@@ -6,7 +6,12 @@ when isMainModule:
 
   import ../src/terminal_graph
 
-  randomize()
+  const RecordingFrameLimit = 120
+  let recordingMode = getEnv("TERMINAL_GRAPH_RECORDING") == "1"
+  if recordingMode:
+    randomize(42)
+  else:
+    randomize()
 
   var stopRequested: Atomic[bool]
 
@@ -30,7 +35,9 @@ when isMainModule:
     config = config
   )
 
-  var step = 0.0
+  var
+    step = 0.0
+    renderedFrames = 0
   stopRequested.store(false, moRelaxed)
   setControlCHook(requestStop)
   try:
@@ -40,7 +47,10 @@ when isMainModule:
       graph.push(0, 20.0 + sin(step) * 5.0 + rand(2.0))
       graph.push(1, 40.0 + cos(step * 0.7) * 12.0 + rand(5.0))
       graph.draw()
+      inc renderedFrames
       sleep(33)
+      if recordingMode and renderedFrames >= RecordingFrameLimit:
+        break
   except IOError:
     discard
   finally:

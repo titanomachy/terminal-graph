@@ -14,7 +14,12 @@ when isMainModule:
     if history.len > HistoryLength:
       history.delete(0)
 
-  randomize()
+  const RecordingFrameLimit = 120
+  let recordingMode = getEnv("TERMINAL_GRAPH_RECORDING") == "1"
+  if recordingMode:
+    randomize(42)
+  else:
+    randomize()
 
   var stopRequested: Atomic[bool]
 
@@ -26,6 +31,7 @@ when isMainModule:
     cpuHistory: seq[float64]
     memoryHistory: seq[float64]
     step = 0.0
+    renderedFrames = 0
     dashboard = initLiveDashboard()
 
   stopRequested.store(false, moRelaxed)
@@ -50,7 +56,10 @@ when isMainModule:
           "  ", memoryHistory[^1].int, "%")
       dashboard.draw(frame)
 
+      inc renderedFrames
       sleep(33)
+      if recordingMode and renderedFrames >= RecordingFrameLimit:
+        break
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard

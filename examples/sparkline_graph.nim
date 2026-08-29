@@ -31,12 +31,8 @@ when isMainModule:
   echo "Shared 0–100     ", sparkline([10, 25, 40, 75, 100], sharedScale)
   echo ""
 
-  var modernGradient = sharedScale
-  modernGradient.useColor = true
-  modernGradient.palette = @[
-    hexColor("#22D3EE"), hexColor("#39C8F0"), hexColor("#4FBCF2"),
-    hexColor("#66B1F4"), hexColor("#7CA6F6"), hexColor("#939BF8"),
-    hexColor("#A98FFA"), hexColor("#C084FC")
-  ]
-  echo "Modern gradient  ", sparkline(
-    [10, 25, 40, 75, 100], modernGradient)
+  var fire = sharedScale
+  fire.useColor = true
+  fire.palette = @FireSparklinePalette
+  echo "Fire gradient    ", sparkline(
+    [10, 25, 40, 75, 100], fire)

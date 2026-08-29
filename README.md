@@ -29,25 +29,27 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
 
 ## Contents
 
-- [Platform support](#platform-support)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Quick start](#quick-start)
-- [API overview](#api-overview)
-  - [Connected lines](#connected-lines)
-  - [Horizontal bars](#horizontal-bars)
-  - [OHLC candles](#ohlc-candles)
-  - [XY and scatter](#xy-and-scatter)
-  - [Static graphs](#static-graphs)
-  - [Sparklines](#sparklines)
-  - [Surfaces and contours](#surfaces-and-contours)
-  - [Multiplot layouts](#multiplot-layouts)
-  - [Live displays](#live-displays)
-    - [Live and streaming examples](#live-and-streaming-examples)
-  - [Terminal styling](#terminal-styling)
-- [Examples](#examples)
-- [Development and documentation](#development-and-documentation)
-- [Attribution and license](#attribution-and-license)
+- [TerminalGraph](#terminalgraph)
+  - [Platform support](#platform-support)
+  - [Requirements](#requirements)
+  - [Contents](#contents)
+  - [Installation](#installation)
+  - [Quick start](#quick-start)
+  - [API overview](#api-overview)
+    - [Connected lines](#connected-lines)
+    - [Horizontal bars](#horizontal-bars)
+    - [OHLC candles](#ohlc-candles)
+    - [XY and scatter](#xy-and-scatter)
+    - [Static graphs](#static-graphs)
+    - [Sparklines](#sparklines)
+    - [Surfaces and contours](#surfaces-and-contours)
+    - [Multiplot layouts](#multiplot-layouts)
+    - [Live displays](#live-displays)
+      - [Live and streaming examples](#live-and-streaming-examples)
+    - [Terminal styling](#terminal-styling)
+  - [Examples](#examples)
+  - [Development and documentation](#development-and-documentation)
+  - [Attribution and license](#attribution-and-license)
 
 ## Installation
 
@@ -127,7 +129,7 @@ echo plot(
 )
 ```
 
-<p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output" width="360"></a></p>
+<p><a href="examples/line_graph.nim"><img src="examples/images/line_graph.png" alt="Connected line chart example output" height="640"></a></p>
 
 ```sh
 nim r --path:src examples/line_graph.nim
@@ -151,7 +153,7 @@ echo plotBars(
 )
 ```
 
-<p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output" width="620"></a></p>
+<p><a href="examples/bar_graph.nim"><img src="examples/images/bar_graph.png" alt="Grouped and stacked horizontal bar chart output" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/bar_graph.nim
@@ -179,7 +181,7 @@ echo plotCandles(
 )
 ```
 
-<p><a href="examples/candle_graph.nim"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart output"></a></p>
+<p><a href="examples/candle_graph.nim"><img src="examples/images/candle_graph.png" alt="Static colored OHLC candle chart output" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/candle_graph.nim
@@ -204,7 +206,7 @@ echo plotScatter([
 ], options)
 ```
 
-<p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output" width="620"></a></p>
+<p><a href="examples/xy_graph.nim"><img src="examples/images/xy_graph.png" alt="Irregular XY line and scatter chart output" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/xy_graph.nim
@@ -223,7 +225,7 @@ graph.push(requests, [12.0, 18.0, 15.0, 27.0, 35.0, 31.0, 42.0])
 echo graph.render(width = 64, height = 14, useColor = false)
 ```
 
-<p><a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Deterministic static graph output"></a></p>
+<p><a href="examples/static_graph.nim"><img src="examples/images/static_graph.png" alt="Deterministic static graph output" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/static_graph.nim
@@ -242,7 +244,7 @@ shared.setSparklineRange(0.0, 100.0)
 echo "Load     ", sparkline([10, 25, 40, 75, 100], shared)
 ```
 
-<p><a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Compact sparkline examples"></a></p>
+<p><a href="examples/sparkline_graph.nim"><img src="examples/images/sparkline_graph.png" alt="Compact sparkline examples" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/sparkline_graph.nim
@@ -266,7 +268,7 @@ options.caption = "Service heatmap"
 echo plotContour(field, options)
 ```
 
-<p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output" width="620"></a></p>
+<p><a href="examples/advanced_graphs.nim"><img src="examples/images/advanced_graphs.png" alt="Surface and filled contour chart output" height="240"></a></p>
 
 ```sh
 nim r --path:src examples/advanced_graphs.nim
@@ -286,7 +288,7 @@ let
 echo multiplot([latency, load], columns = 2, horizontalGap = 4)
 ```
 
-<p><a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot dashboard output"></a></p>
+<p><a href="examples/multiplot_graph.nim"><img src="examples/images/multiplot_graph.png" alt="Responsive multiplot dashboard output" height="325"></a></p>
 
 ```sh
 nim r --path:src examples/multiplot_graph.nim
@@ -332,38 +334,38 @@ candle. Its `renderFrame()` output can also be placed beside another graph in a
 <table>
   <tr>
     <td width="50%">
-      <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart"></a><br>
-      <strong><a href="examples/streaming_candle_graph.nim"><code>streaming_candle_graph.nim</code></a></strong><br>
+      <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart" height="180"></a><br>
+      <strong><a href="examples/streaming_candle_graph.nim"><code>streaming_candle_graph.nim</code></a></strong> · <a href="docs/recordings/streaming_candle_graph.cast"><code>.cast</code></a><br>
       <code>nim r --path:src examples/streaming_candle_graph.nim</code><br>
       Completed periods with a repeatedly updated in-progress candle.
     </td>
     <td width="50%">
-      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="240"></a><br>
-      <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong><br>
+      <a href="examples/live_graph.nim"><img src="examples/images/live_graph2.gif" alt="Animated live service metrics graph" height="180"></a><br>
+      <strong><a href="examples/live_graph.nim"><code>live_graph.nim</code></a></strong> · <a href="docs/recordings/live_graph.cast"><code>.cast</code></a><br>
       <code>nim r --path:src examples/live_graph.nim</code><br>
       Generated service metrics redrawn fluidly as a full terminal frame.
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph" height="240"></a><br>
-      <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong><br>
+      <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming connected line graph" height="180"></a><br>
+      <strong><a href="examples/streaming_line_graph.nim"><code>streaming_line_graph.nim</code></a></strong> · <a href="docs/recordings/streaming_line_graph.cast"><code>.cast</code></a><br>
       <code>nim r --path:src examples/streaming_line_graph.nim</code><br>
       Two connected series in bounded streaming windows.
     </td>
     <td width="50%">
-      <a href="examples/streaming_multiplot_graph.nim"><img src="examples/images/streaming_multiplot_graph2.gif" alt="Animated responsive streaming multiplot dashboard"></a><br>
-      <strong><a href="examples/streaming_multiplot_graph.nim"><code>streaming_multiplot_graph.nim</code></a></strong><br>
-      <code>nim r --path:src examples/streaming_multiplot_graph.nim</code><br>
-      Two live graphs in a resize-aware full-screen dashboard.
+      <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines" height="180"></a><br>
+      <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong> · <a href="docs/recordings/streaming_sparklines.cast"><code>.cast</code></a><br>
+      <code>nim r --path:src examples/streaming_sparklines.nim</code><br>
+      A compact CPU and memory dashboard from reusable sparklines.
     </td>
   </tr>
   <tr>
     <td colspan="2">
-      <a href="examples/streaming_sparklines.nim"><img src="examples/images/streaming_sparklines.gif" alt="Animated streaming CPU and memory sparklines" width="30%"></a><br>
-      <strong><a href="examples/streaming_sparklines.nim"><code>streaming_sparklines.nim</code></a></strong><br>
-      <code>nim r --path:src examples/streaming_sparklines.nim</code><br>
-      A compact CPU and memory dashboard from reusable sparklines.
+      <a href="examples/streaming_multiplot_graph.nim"><img src="examples/images/streaming_multiplot_graph2.gif" alt="Animated responsive streaming multiplot dashboard" height="180"></a><br>
+      <strong><a href="examples/streaming_multiplot_graph.nim"><code>streaming_multiplot_graph.nim</code></a></strong> · <a href="docs/recordings/streaming_multiplot_graph.cast"><code>.cast</code></a><br>
+      <code>nim r --path:src examples/streaming_multiplot_graph.nim</code><br>
+      Two live graphs in a wide, resize-aware full-screen dashboard.
     </td>
   </tr>
 </table>
@@ -402,7 +404,7 @@ nim r --path:src examples/all_graphs.nim
 
 <details>
 <summary><a href="examples/all_graphs.nim"><code>all_graphs.nim</code></a> — finite tour of every graph family</summary>
-<p><a href="examples/images/all_graphs.png"><img src="examples/images/all_graphs.png" alt="Complete output of the all graphs example"></a></p>
+<p><a href="examples/images/all_graphs.png"><img src="examples/images/all_graphs.png" alt="Complete output of the all graphs example" height="480"></a></p>
 </details>
 
 Compile-check every example at once with:
@@ -417,6 +419,7 @@ nimble examples
 nimble test       # run all test suites
 nimble examples   # compile-check all examples
 nimble docs       # generate htmldocs/ from public API comments
+./scripts/regenerate_media.sh  # rebuild README images, casts, and GIFs
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development rules and

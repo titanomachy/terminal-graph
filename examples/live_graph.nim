@@ -6,7 +6,12 @@ when isMainModule:
 
   import ../src/terminal_graph
 
-  randomize()
+  const RecordingFrameLimit = 120
+  let recordingMode = getEnv("TERMINAL_GRAPH_RECORDING") == "1"
+  if recordingMode:
+    randomize(42)
+  else:
+    randomize()
 
   var stopRequested: Atomic[bool]
 
@@ -28,7 +33,9 @@ when isMainModule:
     marker = "•"
   )
 
-  var step = 0.0
+  var
+    step = 0.0
+    renderedFrames = 0
 
   stopRequested.store(false, moRelaxed)
   setControlCHook(requestStop)
@@ -42,7 +49,10 @@ when isMainModule:
         max(8.0 + cos(step * 0.6) * 5.0 + rand(2.0), 0.0))
 
       graph.draw()
+      inc renderedFrames
       sleep(33)
+      if recordingMode and renderedFrames >= RecordingFrameLimit:
+        break
   except IOError:
     # A closed output pipe is a normal way for a terminal program to stop.
     discard
