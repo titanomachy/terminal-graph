@@ -29,7 +29,7 @@ TerminalGraph has been tested on Linux and Windows. On Windows I tested with the
 ## Requirements
 
 - Nim 2.0.0 or newer
-- [`terminal_style`](https://github.com/titanomachy/terminal-style) 0.1.1 or newer, installed from GitHub
+- [`terminal_style`](https://github.com/titanomachy/terminal-style) 0.1.1 or newer
 - No runtime dependencies beyond `terminal_style`
 
 ## Contents
