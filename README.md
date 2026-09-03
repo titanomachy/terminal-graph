@@ -20,7 +20,6 @@ effects and does not change terminal state.
   <a href="examples/streaming_line_graph.nim"><img src="examples/images/streaming_line_graph2.gif" alt="Animated streaming API latency graph" height="150"></a>
   <a href="examples/streaming_candle_graph.nim"><img src="examples/images/streaming_candle_graph.gif" alt="Animated streaming OHLC candle chart" height="150"></a>
 </p>
-<p align="center"><a href="#examples">More examples</a></p>
 
 ## Platform support
 
