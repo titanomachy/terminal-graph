@@ -17,4 +17,6 @@ when isMainModule:
 
   # Explicit dimensions keep the layout deterministic. Color also paints the
   # background of solid cells, hiding font-cell seams in affected terminals.
+  # The complete frame fits these dimensions; over-wide statistics are
+  # truncated. graph.statistics(requests) still returns their complete values.
   echo graph.render(width = 64, height = 14, useColor = true)

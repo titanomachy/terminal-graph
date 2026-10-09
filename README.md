@@ -78,8 +78,7 @@ import terminal_graph
 
 The main module also re-exports `terminal_style`, its palette API, and a modern
 dark-terminal graph palette, so colors, reusable styles, ANSI stripping, and
-display-width helpers do not need a second import. Typed objects and CSV/JSON
-parsing use opt-in modules to keep macros and parsers out of the core facade.
+display-width helpers do not need a second import.
 
 ## Quick start
 
@@ -122,8 +121,13 @@ deterministic.
 `plot` renders one sample-indexed series; `plotMany` places several series on
 the same axes. Option builders configure dimensions, labels, formatters,
 colors, gradients, thresholds, and X-axis ticks.
-Automatic height is capped at 21 plot rows; use `graphHeight` to request a
-larger chart.
+
+`graphWidth` sets the interpolated sample count; axis labels add to the total
+output width. `graphHeight` sets vertical intervals, so `graphHeight(8)` usually
+produces nine plot rows for varying data. Automatic height is capped at 20
+intervals (21 plot rows); pass a positive `graphHeight` or `AsciiGraphConfig.height`
+to request a larger chart. X-axis ticks, captions, and legends add rows outside
+the plot area.
 
 ```nim
 echo plot(
@@ -222,8 +226,14 @@ nim r --path:src examples/xy_graph.nim
 
 `StaticGraph` owns bounded series data and renders a complete deterministic
 frame with optional statistics. Series may use markers or filled columns.
-Over-wide titles and statistics are truncated to keep the complete frame
-within its requested dimensions.
+
+Here, `width` and `height` include the title, statistics, axes, and footer.
+Explicit dimensions must be at least 24 columns by eight rows; zero uses the
+detected terminal size. Over-wide lines are truncated with `…` at ANSI- and
+Unicode-aware column boundaries. The same sizing applies to `LiveGraph` frames.
+Use `statistics(seriesIdx)` to retrieve the complete statistics for retained
+samples when their display line is truncated, or `showStats = false` to give
+the plot an extra row.
 
 ```nim
 var graph = initStaticGraph("Weekly requests", unit = "requests")
@@ -308,9 +318,13 @@ nim r --path:src examples/multiplot_graph.nim
 state. Their `renderFrame()` methods are side-effect free; `startLive`, `draw`,
 and `stopLive` provide in-place terminal output. Always restore terminal state
 in a `finally` block.
-Line and candle redraws account for wrapped terminal rows. Pass `width = 80`
-to `draw` to supply an explicit output width; by default, `draw()` detects the
-current terminal width.
+
+`LiveLineGraph.draw()` and `LiveCandleGraph.draw()` detect the output terminal's
+column count on each redraw and account for wrapped rows, including when a
+resize rewraps the previous frame. For a known output width, call
+`draw(width = 80)`. This width controls cursor movement; set `config.width` or
+`options.width` to change the chart canvas. `renderFrame()` uses those chart
+options and keeps terminal output in `draw()`.
 
 ```nim
 var options = initCandlePlotOptions()

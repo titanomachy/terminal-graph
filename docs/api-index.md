@@ -58,6 +58,24 @@ echo plot(
 - [`multiplot_graphs`](terminal_graph/multiplot_graphs.html) — ANSI- and
   Unicode-aware grids with responsive width-aware renderers.
 
+## Dimensions and live output
+
+| API | What its dimensions measure |
+| --- | --- |
+| `plot`, `plotMany`, `AsciiGraphConfig` | Interpolated samples across the canvas and vertical intervals. Axis labels, X-axis ticks, captions, and legends add to the complete output. Automatic height is capped at 20 intervals (21 plot rows); explicit positive heights can request more. |
+| `plotCandles`, `CandlePlotOptions` | Price-canvas columns and rows. The axis, caption, baseline, and period labels are outside that canvas. |
+| `StaticGraph.render`, `LiveGraph.renderFrame` | The complete frame, including its title, statistics, axes, and footer. Explicit dimensions start at 24 columns by eight rows; zero detects terminal size. Over-wide lines are truncated with `…` using ANSI- and Unicode-aware widths. |
+| `LiveLineGraph.draw`, `LiveCandleGraph.draw` | The optional `width` is the output terminal's column count for redraw cursor movement. Zero detects the output width; a positive value supplies a known width. Chart dimensions remain in `config` or `options`. |
+
+Use `statistics(seriesIdx)` to access complete retained-sample statistics when
+a static or `LiveGraph` statistics line is truncated. Set `showStats = false`
+to give the canvas an extra row.
+
+Line and candle redraws count wrapped rows at the current output width.
+`renderFrame()` produces the chart string for embedding or composition. For
+responsive full-screen layouts, combine `LiveDashboard` with
+`multiplotResponsive` and render callbacks that honor their assigned widths.
+
 ## Generate locally
 
 ```

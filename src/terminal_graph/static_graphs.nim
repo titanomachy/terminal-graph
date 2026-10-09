@@ -214,6 +214,8 @@ proc clearRange*(plotter: var Plotter) =
 proc statistics*(plotter: Plotter;
                  seriesIdx: int): Option[SeriesStats] =
   ## Computes statistics for a series, or ``none`` if it has no samples.
+  ## The complete retained-sample statistics are available even when
+  ## ``render`` truncates their display line to fit the frame width.
   plotter.requireSeries(seriesIdx)
   let series = plotter.series[seriesIdx]
   if series.data.len == 0:
@@ -297,8 +299,13 @@ proc render*(plotter: Plotter; width = 0; height = 0;
   ## default) to use the detected terminal size. Explicit dimensions make
   ## snapshots and redirected output deterministic. Set ``useColor`` to false
   ## to omit ANSI escape sequences. When multiple series occupy the same cell,
-  ## the series added last is visible. Over-wide titles, statistics, and
-  ## footers are truncated to the frame width without breaking ANSI styles.
+  ## the series added last is visible.
+  ##
+  ## Explicit dimensions start at 24 columns by eight rows. Every over-wide
+  ## line is truncated with an ellipsis at ANSI- and Unicode-aware column
+  ## boundaries. Titles, statistics, axes, and footers share the frame budget.
+  ## ``showStats = false`` gives the plot one extra row. Use ``statistics``
+  ## to retrieve complete retained-sample statistics when a line is truncated.
   let
     frameWidth = resolvedDimension(
       width, terminalWidth(), MinimumRenderWidth, "width")

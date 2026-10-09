@@ -30,6 +30,8 @@ when isMainModule:
     @[5.0, 4.0, 2.0, 1.0, 4.0, 6.0, 6.0]
   ]
 
+  # Automatic height follows the value range, up to 20 vertical intervals
+  # (21 plot rows). Set graphHeight explicitly to request a taller chart.
   echo plotMany(
     services,
     graphSeriesColors(ModernGraphSeriesColors),

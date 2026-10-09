@@ -63,6 +63,9 @@ when isMainModule:
       current.low = min(current.low, nextClose)
       current.close = nextClose
       graph.updateLatest(current)
+      # Detect output columns on each draw and count wrapped terminal rows.
+      # Use graph.draw(width = 80) when the output width is known explicitly;
+      # options.width above controls the price canvas.
       graph.draw()
       inc renderedFrames
       sleep(100)

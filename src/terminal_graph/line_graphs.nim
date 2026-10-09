@@ -6,8 +6,10 @@
 ## The renderer supports one or many series, interpolation, soft bounds,
 ## captions, legends, custom characters and axis formatters, X-axis labels,
 ## standard, indexed, and RGB colors, value gradients, threshold colors, NaN
-## gaps, and custom
-## line endings. Most applications should import the ``terminal_graph``
+## gaps, and custom line endings. Automatic height is capped at 20 vertical
+## intervals (21 plot rows); explicit positive heights can request more.
+## Axis labels, X-axis ticks, captions, and legends are outside the canvas.
+## Most applications should import the ``terminal_graph``
 ## façade rather than this submodule directly.
 
 import std/[math, options, sequtils, strformat, strutils, unicode]
@@ -37,7 +39,11 @@ type
     ## Complete line-graph configuration. ``initAsciiGraphConfig`` supplies
     ## defaults; option builders are the more concise public interface.
     width*: int
+      ## Interpolated sample count; non-positive values use the longest series.
+      ## Axis labels add to the complete output width.
     height*: int
+      ## Vertical intervals for varying data. Non-positive values select an
+      ## automatic height capped at 20 intervals (21 plot rows).
     lowerBound*: Option[float64]
     upperBound*: Option[float64]
     offset*: int
@@ -109,7 +115,8 @@ proc createLineCharSet*(character: string): LineCharSet =
   )
 
 proc initAsciiGraphConfig*(): AsciiGraphConfig =
-  ## Returns the default line-graph configuration.
+  ## Returns the default line-graph configuration, including automatic width
+  ## and height. Automatic height is capped at 20 intervals (21 plot rows).
   AsciiGraphConfig(
     offset: 3,
     lineEnding: "\n",
@@ -124,12 +131,15 @@ proc initAsciiGraphConfig*(): AsciiGraphConfig =
 
 proc graphWidth*(value: int): LineGraphOption =
   ## Sets the interpolated plot width. Non-positive values restore auto width.
+  ## Axis labels add columns outside this canvas width.
   result = proc(config: var AsciiGraphConfig) =
     config.width = max(value, 0)
 
 proc graphHeight*(value: int): LineGraphOption =
-  ## Sets the plot height. Non-positive values restore automatic height,
-  ## capped at 20 intervals (21 plot rows).
+  ## Sets vertical intervals for varying data, usually producing one more
+  ## plot row. A positive value can request a larger chart; non-positive values
+  ## restore automatic height, capped at 20 intervals (21 plot rows).
+  ## X-axis ticks, captions, and legends add rows outside the canvas.
   result = proc(config: var AsciiGraphConfig) =
     config.height = max(value, 0)
 

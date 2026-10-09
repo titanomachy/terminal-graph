@@ -46,6 +46,9 @@ when isMainModule:
       step += 0.06
       graph.push(0, 20.0 + sin(step) * 5.0 + rand(2.0))
       graph.push(1, 40.0 + cos(step * 0.7) * 12.0 + rand(5.0))
+      # Detect output columns on each draw and count wrapped terminal rows.
+      # Use graph.draw(width = 80) when the output width is known explicitly;
+      # config.width above controls the chart canvas.
       graph.draw()
       inc renderedFrames
       sleep(33)

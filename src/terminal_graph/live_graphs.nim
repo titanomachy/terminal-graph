@@ -30,6 +30,8 @@ type LiveTerminalSession = object
 
 type LiveGraph* = object
   ## A plotter configured for repeated full-screen terminal rendering.
+  ## Width and height describe the complete frame, as in ``Plotter.render``;
+  ## over-wide lines are truncated while retaining ANSI and Unicode boundaries.
   plotter*: Plotter
   width*: int
   height*: int
@@ -342,6 +344,9 @@ proc initLiveLineGraph*(seriesCount = 1; maxSamples = 80;
                         config = initAsciiGraphConfig();
                         output: File = stdout): LiveLineGraph =
   ## Creates a colored streaming line graph without touching terminal state.
+  ## ``config`` controls the canvas, including the bounded automatic height.
+  ## The optional ``draw(width = ...)`` argument specifies output terminal
+  ## columns for cursor movement and leaves these chart dimensions intact.
   if seriesCount <= 0:
     raise newException(ValueError, "seriesCount must be greater than zero")
   if maxSamples <= 0:
@@ -425,9 +430,16 @@ proc startLive*(graph: var LiveLineGraph; clearScreen = true) =
 
 proc draw*(graph: var LiveLineGraph; width = 0) =
   ## Redraws the streaming line graph, preserving content above it.
-  ## Wrapped rows are included when moving back to the previous frame.
-  ## ``width`` specifies output columns; zero detects the current terminal
-  ## width. Rendering through ``renderFrame`` remains independent of this.
+  ##
+  ## Wrapped rows are counted at the current width when moving back to the
+  ## previous frame. ``width = 0`` detects the configured output terminal's
+  ## columns on each draw, falling back to the standard terminal width when
+  ## detection is unavailable. A positive width supplies known output columns;
+  ## negative widths raise ``ValueError``.
+  ##
+  ## This width controls cursor movement. Change ``config.width`` and
+  ## ``config.height`` to resize the canvas; ``renderFrame`` uses that config
+  ## independently of terminal output.
   if not graph.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live line graph")
@@ -596,9 +608,16 @@ proc startLive*(graph: var LiveCandleGraph; clearScreen = true) =
 
 proc draw*(graph: var LiveCandleGraph; width = 0) =
   ## Redraws the streaming candle chart while preserving content above it.
-  ## Wrapped rows are included when moving back to the previous frame.
-  ## ``width`` specifies output columns; zero detects the current terminal
-  ## width. Rendering through ``renderFrame`` remains independent of this.
+  ##
+  ## Wrapped rows are counted at the current width when moving back to the
+  ## previous frame. ``width = 0`` detects the configured output terminal's
+  ## columns on each draw, falling back to the standard terminal width when
+  ## detection is unavailable. A positive width supplies known output columns;
+  ## negative widths raise ``ValueError``.
+  ##
+  ## This width controls cursor movement. Change ``options.width`` and
+  ## ``options.height`` to resize the price canvas; ``renderFrame`` uses those
+  ## options independently of terminal output.
   if not graph.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live candle graph")

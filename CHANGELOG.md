@@ -4,8 +4,22 @@ This project follows Semantic Versioning.
 
 [Unreleased]
 
+### Added
+
+- Add an optional output-column `width` to `LiveLineGraph.draw` and
+  `LiveCandleGraph.draw` for terminal output with a known width. Zero detects
+  the current output terminal width.
+
 ### Fixed
 
+- Cap automatic connected-line chart height at 20 intervals (21 plot rows),
+  preventing large numeric ranges from allocating thousands or millions of
+  rows. Explicit positive heights still support larger charts.
+- Keep static and `LiveGraph` frame lines within their complete width budget,
+  truncating over-wide output with an ellipsis while preserving ANSI styles
+  and Unicode graphemes.
+- Count wrapped terminal rows when replacing live line and candle frames,
+  including when a terminal resize rewraps the previous frame.
 - Exit every interactive streaming example cleanly on Ctrl+C by requesting
   shutdown through an atomic signal flag, restoring the live terminal session,
   and only then removing the temporary control hook.
