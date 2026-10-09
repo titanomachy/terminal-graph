@@ -122,6 +122,8 @@ deterministic.
 `plot` renders one sample-indexed series; `plotMany` places several series on
 the same axes. Option builders configure dimensions, labels, formatters,
 colors, gradients, thresholds, and X-axis ticks.
+Automatic height is capped at 21 plot rows; use `graphHeight` to request a
+larger chart.
 
 ```nim
 echo plot(

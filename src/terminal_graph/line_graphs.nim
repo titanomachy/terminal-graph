@@ -68,6 +68,8 @@ type
     color: TerminalColor
 
 const
+  MaximumAutomaticHeight = 20
+
   DefaultLineCharSet* = LineCharSet(
     horizontal: "─",
     verticalLine: "│",
@@ -126,7 +128,8 @@ proc graphWidth*(value: int): LineGraphOption =
     config.width = max(value, 0)
 
 proc graphHeight*(value: int): LineGraphOption =
-  ## Sets the plot height. Non-positive values restore automatic height.
+  ## Sets the plot height. Non-positive values restore automatic height,
+  ## capped at 20 intervals (21 plot rows).
   result = proc(config: var AsciiGraphConfig) =
     config.height = max(value, 0)
 
@@ -244,6 +247,8 @@ proc portRound(value: float64): float64 =
 proc calculateHeight(interval: float64): int =
   if interval <= 0.0:
     return 1
+  if interval >= float64(MaximumAutomaticHeight):
+    return MaximumAutomaticHeight
   if interval >= 1.0:
     return int(interval)
   let

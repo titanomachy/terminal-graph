@@ -160,6 +160,22 @@ suite "ASCII line graphs":
     config.caption = "reused"
     check plot([1, 2, 3], config).endsWith("reused")
 
+  test "bounds automatic height independently of the value range":
+    let graph = plot([10_000, 20_000])
+    check graph.splitLines.len == 21
+    check graph.splitLines[0].strip.startsWith("20000")
+    check graph.splitLines[^1].strip.startsWith("10000")
+
+    let multiple = plotMany(@[
+      @[0.0, 10_000_000.0],
+      @[-10_000_000.0, 0.0]
+    ])
+    check multiple.splitLines.len == 21
+    check multiple.splitLines[0].strip.startsWith("10000000")
+    check multiple.splitLines[^1].strip.startsWith("-10000000")
+
+    check plot([0, 100], graphHeight(40)).splitLines.len == 41
+
   test "validates unusable datasets":
     expect ValueError:
       discard plot(newSeq[float64]())
