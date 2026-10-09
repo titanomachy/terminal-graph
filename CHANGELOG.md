@@ -4,11 +4,28 @@ This project follows Semantic Versioning.
 
 [Unreleased]
 
+[0.1.2] - 2026-10-09
+
 ### Added
 
+- Add `ModernGraphPalette`, `ModernGraphSeriesColors`, `ModernGraphGradient`,
+  and reusable heading and muted styles for dark terminal backgrounds.
 - Add an optional output-column `width` to `LiveLineGraph.draw` and
   `LiveCandleGraph.draw` for terminal output with a known width. Zero detects
   the current output terminal width.
+- Publish generated API documentation and a GitHub-hosted coverage badge
+  through GitHub Pages.
+- Add reproducible example media generation and tracked source recordings for
+  the streaming demonstrations.
+
+### Changed
+
+- Support TerminalStyle colors in static and `LiveGraph` series while retaining
+  `std/terminal` foreground-color compatibility overloads.
+- Use the shared graph palette across examples and refresh their screenshots
+  and animations.
+- Document automatic height limits, complete-frame sizing, truncated
+  statistics, and live output-column widths in the README and API reference.
 
 ### Fixed
 
