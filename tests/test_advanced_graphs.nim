@@ -299,6 +299,44 @@ suite "colored live line graphs":
     check graph.renderFrame() == ""
 
   when defined(posix):
+    test "replaces wrapped line frames using their physical row count":
+      let (output, path) = createTempFile(
+        "terminal_graph_wrapped_line_", ".txt")
+      var outputOpen = true
+      defer:
+        if outputOpen:
+          output.close()
+        if path.fileExists:
+          path.removeFile()
+
+      var config = initAsciiGraphConfig()
+      config.height = 6
+      config.seriesColors = @[colorBrightCyan]
+      var graph = initLiveLineGraph(config = config, output = output)
+      for index in 0 ..< 80:
+        graph.push(0, if index mod 2 == 0: 10.0 else: 20.0)
+      let frame = graph.renderFrame()
+      check frame.splitLines.len == 7
+      check frame.displayWidth == 87
+
+      graph.startLive(clearScreen = false)
+      try:
+        graph.draw(width = 80)
+        graph.draw(width = 80)
+        graph.draw(width = 40)
+        expect ValueError:
+          graph.draw(width = -1)
+      finally:
+        graph.stopLive()
+
+      output.close()
+      outputOpen = false
+      let emitted = path.readFile()
+      check "\e[14A\r" in emitted
+      check "\e[21A\r" in emitted
+      check "\e[7A\r" notin emitted
+      check emitted.endsWith("\e[0m\e[?25h")
+
     test "repaints before erasing stale rows":
       let (output, path) = createTempFile(
         "terminal_graph_live_line_", ".txt")

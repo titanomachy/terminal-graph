@@ -53,7 +53,7 @@ type LiveLineGraph* = object
   sampleLimit*: int
   series: seq[Deque[float64]]
   session: LiveTerminalSession
-  previousFrameLines: int
+  previousFrame: string
 
 type LiveCandleGraph* = object
   ## A bounded OHLC history rendered repeatedly by ``plotCandles``.
@@ -62,7 +62,7 @@ type LiveCandleGraph* = object
   candles: Deque[Candle]
   labels: Deque[string]
   session: LiveTerminalSession
-  previousFrameLines: int
+  previousFrame: string
 
 when defined(windows):
   const
@@ -158,6 +158,39 @@ proc drawFullScreen(session: LiveTerminalSession; frame: string) =
     session.output.eraseScreen()
     session.output.write frame
   session.output.flushFile()
+
+proc outputWidth(session: LiveTerminalSession; requested: int): int =
+  if requested < 0:
+    raise newException(ValueError, "live output width cannot be negative")
+  if requested > 0:
+    return requested
+  when defined(posix):
+    let detected = terminalWidthIoctl([int(session.output.getFileHandle())])
+    if detected > 0:
+      return detected
+  elif defined(windows):
+    if session.output == stdout or session.output == stderr:
+      let handle = getStdHandle(
+        if session.output == stderr: STD_ERROR_HANDLE else: STD_OUTPUT_HANDLE)
+      let detected = terminalWidthIoctl([handle])
+      if detected > 0:
+        return detected
+  max(terminalWidth(), 1)
+
+proc drawInline(session: LiveTerminalSession; frame: string;
+                previousFrame: var string; width: int) =
+  let columns = session.outputWidth(width)
+  if frame.len == 0:
+    return
+  # A terminal resize can rewrap the previous frame, so count its occupied
+  # rows at the current width rather than saving its old logical line count.
+  let previousRows = if previousFrame.len == 0:
+    0
+  else:
+    wrapAnsi(previousFrame, columns, wrapCharacters).len
+  session.output.write frame.replaceLinesSequence(previousRows)
+  session.output.flushFile()
+  previousFrame = frame
 
 proc stopSession(session: var LiveTerminalSession) =
   if not session.active:
@@ -320,7 +353,7 @@ proc initLiveLineGraph*(seriesCount = 1; maxSamples = 80;
     sampleLimit: maxSamples,
     series: newSeqWith(seriesCount, initDeque[float64]()),
     session: initLiveTerminalSession(output),
-    previousFrameLines: 0
+    previousFrame: ""
   )
 
 proc requireSeries(graph: LiveLineGraph; seriesIdx: int) =
@@ -388,25 +421,22 @@ proc startLive*(graph: var LiveLineGraph; clearScreen = true) =
     clearScreen = clearScreen,
     alternateScreen = false
   )
-  graph.previousFrameLines = 0
+  graph.previousFrame = ""
 
-proc draw*(graph: var LiveLineGraph) =
+proc draw*(graph: var LiveLineGraph; width = 0) =
   ## Redraws the streaming line graph, preserving content above it.
+  ## Wrapped rows are included when moving back to the previous frame.
+  ## ``width`` specifies output columns; zero detects the current terminal
+  ## width. Rendering through ``renderFrame`` remains independent of this.
   if not graph.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live line graph")
-  let frame = graph.renderFrame()
-  if frame.len == 0:
-    return
-  let update = frame.replaceLinesSequence(graph.previousFrameLines)
-  graph.session.output.write update
-  graph.session.output.flushFile()
-  graph.previousFrameLines = frame.splitLines().len
+  graph.session.drawInline(graph.renderFrame(), graph.previousFrame, width)
 
 proc stopLive*(graph: var LiveLineGraph) =
   ## Stops streaming and restores terminal attributes and cursor visibility.
   graph.session.stopSession()
-  graph.previousFrameLines = 0
+  graph.previousFrame = ""
 
 proc initLiveCandleGraph*(maxCandles = 80;
                           options = initCandlePlotOptions();
@@ -562,22 +592,19 @@ proc startLive*(graph: var LiveCandleGraph; clearScreen = true) =
     clearScreen = clearScreen,
     alternateScreen = false
   )
-  graph.previousFrameLines = 0
+  graph.previousFrame = ""
 
-proc draw*(graph: var LiveCandleGraph) =
+proc draw*(graph: var LiveCandleGraph; width = 0) =
   ## Redraws the streaming candle chart while preserving content above it.
+  ## Wrapped rows are included when moving back to the previous frame.
+  ## ``width`` specifies output columns; zero detects the current terminal
+  ## width. Rendering through ``renderFrame`` remains independent of this.
   if not graph.session.active:
     raise newException(ValueError,
       "call startLive before drawing a live candle graph")
-  let frame = graph.renderFrame()
-  if frame.len == 0:
-    return
-  let update = frame.replaceLinesSequence(graph.previousFrameLines)
-  graph.session.output.write update
-  graph.session.output.flushFile()
-  graph.previousFrameLines = frame.splitLines().len
+  graph.session.drawInline(graph.renderFrame(), graph.previousFrame, width)
 
 proc stopLive*(graph: var LiveCandleGraph) =
   ## Stops streaming and restores terminal attributes and cursor visibility.
   graph.session.stopSession()
-  graph.previousFrameLines = 0
+  graph.previousFrame = ""

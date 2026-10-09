@@ -308,6 +308,9 @@ nim r --path:src examples/multiplot_graph.nim
 state. Their `renderFrame()` methods are side-effect free; `startLive`, `draw`,
 and `stopLive` provide in-place terminal output. Always restore terminal state
 in a `finally` block.
+Line and candle redraws account for wrapped terminal rows. Pass `width = 80`
+to `draw` to supply an explicit output width; by default, `draw()` detects the
+current terminal width.
 
 ```nim
 var options = initCandlePlotOptions()

@@ -262,6 +262,43 @@ suite "live candle charts":
       graph.push(candle(1, 2, 0, 1), "bad\nlabel")
 
   when defined(posix):
+    test "replaces wrapped candle frames including styled Unicode captions":
+      let (output, path) = createTempFile(
+        "terminal_graph_wrapped_candles_", ".txt")
+      var outputOpen = true
+      defer:
+        if outputOpen:
+          output.close()
+        if path.fileExists:
+          path.removeFile()
+
+      var options = liveOptions()
+      options.width = 84
+      options.useColor = true
+      options.caption = repeat("市", 40)
+      options.labelColor = colorBrightCyan
+      var graph = initLiveCandleGraph(options = options, output = output)
+      graph.push(candle(10, 12, 9, 11))
+      let frame = graph.renderFrame()
+      check frame.splitLines.len == 6
+      check frame.displayWidth == 84
+
+      graph.startLive(clearScreen = false)
+      try:
+        graph.draw(width = 80)
+        graph.draw(width = 80)
+        graph.draw(width = 40)
+      finally:
+        graph.stopLive()
+
+      output.close()
+      outputOpen = false
+      let emitted = path.readFile()
+      check "\e[11A\r" in emitted
+      check "\e[17A\r" in emitted
+      check "\e[6A\r" notin emitted
+      check emitted.endsWith("\e[0m\e[?25h")
+
     test "redraws and restores live terminal state":
       let (output, path) = createTempFile(
         "terminal_graph_candles_", ".txt")
