@@ -222,6 +222,8 @@ nim r --path:src examples/xy_graph.nim
 
 `StaticGraph` owns bounded series data and renders a complete deterministic
 frame with optional statistics. Series may use markers or filled columns.
+Over-wide titles and statistics are truncated to keep the complete frame
+within its requested dimensions.
 
 ```nim
 var graph = initStaticGraph("Weekly requests", unit = "requests")

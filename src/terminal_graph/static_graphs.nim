@@ -297,7 +297,8 @@ proc render*(plotter: Plotter; width = 0; height = 0;
   ## default) to use the detected terminal size. Explicit dimensions make
   ## snapshots and redirected output deterministic. Set ``useColor`` to false
   ## to omit ANSI escape sequences. When multiple series occupy the same cell,
-  ## the series added last is visible.
+  ## the series added last is visible. Over-wide titles, statistics, and
+  ## footers are truncated to the frame width without breaking ANSI styles.
   let
     frameWidth = resolvedDimension(
       width, terminalWidth(), MinimumRenderWidth, "width")
@@ -416,3 +417,10 @@ proc render*(plotter: Plotter; width = 0; height = 0;
     result.add ansiCode(taBold)
   result.add timeline
   result.appendReset(useColor)
+
+  let lines = result.splitLines()
+  result.setLen(0)
+  for index, line in lines:
+    if index > 0:
+      result.add '\n'
+    result.add truncateAnsi(line, frameWidth)

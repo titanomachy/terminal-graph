@@ -226,6 +226,32 @@ suite "terminal_graph sparklines":
       options.setSparklineRange(2.0, 1.0)
 
 suite "terminal_graph live display":
+  test "keeps live frame lines within the complete width and height":
+    var graph = initLiveGraph("Live service metrics", unit = "req/s",
+      width = 80, height = 24)
+    let throughput = graph.addSeries("throughput", style = psFill, marker = "▄")
+    let errors = graph.addSeries("errors")
+    graph.push(throughput, [40.0, 50.0])
+    graph.push(errors, [8.0, 10.0])
+
+    for useColor in [false, true]:
+      graph.useColor = useColor
+      for dimensions in [(80, 24), (MinimumRenderWidth, MinimumRenderHeight)]:
+        graph.width = dimensions[0]
+        graph.height = dimensions[1]
+        let lines = graph.renderFrame().splitLines()
+        check lines.len == graph.height
+        for line in lines:
+          check line.displayWidth <= graph.width
+        check stripAnsi(lines[1]).endsWith("…")
+
+    graph.plotter.title = repeat("服務指標", 20)
+    let lines = graph.renderFrame().splitLines()
+    check lines.len == graph.height
+    check stripAnsi(lines[0]).endsWith("…")
+    for line in lines:
+      check line.displayWidth <= graph.width
+
   test "builds deterministic frames without changing terminal state":
     var graph = initLiveGraph(
       "Live requests",
